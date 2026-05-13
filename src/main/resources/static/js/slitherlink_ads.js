@@ -12,7 +12,7 @@
         },
         {
             img:      "/images/ad6.png",
-            headline: "7x7 DARE YOU?",
+            headline: "10x10 DARE YOU?",
             sub:      "The hardest loop\nyou'll ever close.",
         },
         {
@@ -28,6 +28,11 @@
             img:      "/images/ad3.png",
             headline: "MORE than just a game.\nNO MERCY.",
             sub:      "play with your friends\nWho wins ???"
+        },
+        {
+            img:      "/images/ad7.png",
+            headline: "TRY OUR CUTEST GAME EVER",
+            sub:      "roll your cube\n WIN ALL LEVELS !"
         },
     ];
 
