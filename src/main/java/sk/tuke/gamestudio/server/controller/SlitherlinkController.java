@@ -145,7 +145,7 @@ public class SlitherlinkController {
         model.addAttribute("spectateToken", spectateToken);
         model.addAttribute("hasActiveStream", spectateService.hasActiveStream(session.getPlayerName(), session.getCurrentLevel()));
         model.addAttribute("spectateMsg", spectateMsg);
-        return "slitherlink";
+        return "game/slitherlink";
     }
 
     @RequestMapping("/slitherlink/checktime")

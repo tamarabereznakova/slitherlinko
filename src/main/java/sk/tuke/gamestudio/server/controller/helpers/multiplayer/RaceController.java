@@ -105,7 +105,7 @@ public class RaceController {
         model.addAttribute("opponentName", game.opponentOf(session.getPlayerName()));
         model.addAttribute("levelName", SlitherlinkControllerHelper.getLevelName(game.level));
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "race_game";
+        return "multiplayer/race_game";
     }
 
     @GetMapping("/api/race/{token}")

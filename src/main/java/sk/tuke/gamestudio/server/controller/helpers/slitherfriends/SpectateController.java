@@ -124,14 +124,14 @@ public class SpectateController {
         if (invite == null) {
             model.addAttribute("error", "expired");
             SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-            return "spectate";
+            return "game/spectate";
         }
 
         model.addAttribute("token", token);
         model.addAttribute("spectatedPlayer", invite.getFromPlayer());
         model.addAttribute("levelName", SlitherlinkControllerHelper.getLevelName(invite.getLevel()));
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "spectate";
+        return "game/spectate";
     }
 
     @GetMapping("/slitherlink/inbox")
@@ -140,7 +140,7 @@ public class SpectateController {
         model.addAttribute("messages", gameInviteService.getInbox(session.getPlayerName()));
         model.addAttribute("isInbox", true);
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "mailbox";
+        return "player/mailbox";
     }
 
     @GetMapping("/slitherlink/outbox")
@@ -149,7 +149,7 @@ public class SpectateController {
         model.addAttribute("messages", gameInviteService.getOutbox(session.getPlayerName()));
         model.addAttribute("isInbox", false);
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "mailbox";
+        return "player/mailbox";
     }
 
     @GetMapping("/slitherlink/deleteinvite")

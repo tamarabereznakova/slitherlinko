@@ -71,7 +71,7 @@ public class SlitherlinkGameController {
         }
         model.addAttribute("myRaceLobby", myRaceLobby);
         model.addAttribute("myCoopLobby", myCoopLobby);
-        return "level";
+        return "game/level";
     }
 
     @RequestMapping("/slitherlink/new")

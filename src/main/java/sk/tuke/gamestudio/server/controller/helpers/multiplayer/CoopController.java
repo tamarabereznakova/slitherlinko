@@ -101,7 +101,7 @@ public class CoopController {
         model.addAttribute("isCreator", session.getPlayerName().equals(game.creator));
         model.addAttribute("levelName", SlitherlinkControllerHelper.getLevelName(game.level));
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "coop_game";
+        return "multiplayer/coop_game";
     }
 
     @GetMapping("/api/coop/{token}")

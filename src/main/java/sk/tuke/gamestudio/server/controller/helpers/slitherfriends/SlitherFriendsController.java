@@ -54,7 +54,7 @@ public class SlitherFriendsController {
     private AchievementChecker achievementChecker;
 
     private static String profileGame(String username) {
-        return "profile:" + username;
+        return "player/profile:" + username;
     }
 
     @GetMapping("/slitherlink/profile/{username}")
@@ -108,7 +108,7 @@ public class SlitherFriendsController {
         if (session.getPlayerName() != null && session.getPlayerName().equals(username)) {
             achievementChecker.check(username);
         }
-        return "slitherfriends_profile";
+        return "slitherfriends/slitherfriends_profile";
     }
 
     private List<Score> filterTopScores(String username, int level) {
@@ -146,7 +146,7 @@ public class SlitherFriendsController {
         model.addAttribute("searchFound", searchFound);
 
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "slitherfriends";
+        return "slitherfriends/slitherfriends";
     }
 
     @GetMapping("/slitherlink/follow")

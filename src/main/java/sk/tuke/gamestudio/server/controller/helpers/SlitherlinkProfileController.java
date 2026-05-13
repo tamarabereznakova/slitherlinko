@@ -87,7 +87,7 @@ public class SlitherlinkProfileController {
         model.addAttribute("inTop10", session.isInTop10());
         model.addAttribute("levelName", SlitherlinkControllerHelper.getLevelName(session.getCurrentLevel()));
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "result";
+        return "game/result";
     }
 
     private void saveScoreAndReplay() {
@@ -143,7 +143,7 @@ public class SlitherlinkProfileController {
         model.addAttribute("unreadCount", gameInviteService.countUnread(session.getPlayerName()));
         addTopPositions(model);
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "profile";
+        return "player/profile";
     }
 
     private void addTopPositions(Model model) {
@@ -221,7 +221,7 @@ public class SlitherlinkProfileController {
         model.addAttribute("score", score);
         model.addAttribute("levelName", SlitherlinkControllerHelper.getLevelName(score.getLevel()));
         SlitherlinkControllerHelper.addCommonAttributes(model, session, scoreService, commentService, ratingService, followService);
-        return "replay";
+        return "game/replay";
     }
 
     @PostMapping("/slitherlink/settings")
