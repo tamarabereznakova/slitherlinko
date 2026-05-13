@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Co-op Game')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">CO-OP — <span th:text="${levelName}">5×5</span></div>
+
+        <div class="game-info" style="margin-bottom: 16px;">
+            <span>👤 You: <strong th:text="${playerName}">Player</strong></span>
+            <span>👑 Creator: <strong th:text="${creator}" style="color: var(--neon-pink);">Creator</strong>
+                <span id="creator-status" style="font-size: 0.6rem; margin-left: 4px;"></span>
+            </span>
+            <span>Moves: <strong id="coop-moves">0</strong></span>
+            <span>⏱ Time: <strong id="coop-timer">0s</strong></span>
+            <span id="coop-status" style="font-size: 0.65rem; color: var(--accent-yellow);">● connecting...</span>
+        </div>
+
+        <div class="card" style="max-width: 700px; padding: 8px 16px; margin-bottom: 16px;">
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+                <span class="text-dim" style="font-size: 0.6rem;">PLAYERS:</span>
+                <div id="active-players" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
+            </div>
+        </div>
+
+        <!--plocha-->
+        <div id="coop-field">
+            <p class="text-dim" style="font-size: 0.75rem;">Loading game...</p>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <a th:if="${isCreator}"
+               th:href="@{'/slitherlink/coop/' + ${token} + '/end'}"
+               class="btn btn-pink" style="font-size: 0.65rem;">End game</a>
+            <a th:unless="${isCreator}"
+               th:href="@{'/slitherlink/coop/' + ${token} + '/leave'}"
+               class="btn btn-pink" style="font-size: 0.65rem;">← Leave game</a>
+        </div>
+
+        <div id="win-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+             z-index:1000; justify-content:center; align-items:center;">
+            <div class="card" style="max-width: 500px; width: 90%; text-align: center;">
+                <div class="section-title" style="color: var(--neon-green); font-size: 1.5rem;">
+                    HOORAY VICTORY!
+                </div>
+                <p style="font-size: 0.85rem; margin: 16px 0;">
+                    The team solved the puzzle!
+                </p>
+                <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 20px;">
+                    <strong id="win-moves">0</strong> moves ·
+                    <strong id="win-duration">0s</strong>
+                </p>
+                <a th:href="@{'/slitherlink/lobby/coop/' + ${token}}"
+                   class="btn btn-blue" style="font-size: 0.7rem;">← Back to lobby</a>
+            </div>
+        </div>
+
+        <div id="left-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+             z-index:1000; justify-content:center; align-items:center;">
+            <div class="card" style="max-width: 500px; width: 90%; text-align: center;">
+                <div class="section-title pink" style="font-size: 1.2rem;">
+                    Creator left the game
+                </div>
+                <p class="text-dim" style="font-size: 0.75rem; margin: 16px 0;">
+                    The host has ended the session. Returning to lobby...
+                </p>
+                <a th:href="@{'/slitherlink/lobby/coop/' + ${token}}"
+                   class="btn btn-blue" style="font-size: 0.7rem;">← To lobby</a>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const COOP_TOKEN = '[[${token}]]';
+    const ME = '[[${playerName}]]';
+    const IS_CREATOR = [[${isCreator}]];
+
+    const fieldEl = document.getElementById('coop-field');
+    const movesEl = document.getElementById('coop-moves');
+    const timerEl = document.getElementById('coop-timer');
+    const statusEl = document.getElementById('coop-status');
+    const creatorStatusEl = document.getElementById('creator-status');
+    const activePlayersEl = document.getElementById('active-players');
+
+    let pollInterval = null;
+    let lastClickTime = 0;
+    let pendingRender = true;
+
+    document.getElementById('coop-field').addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const href = link.getAttribute('href') || '';
+        const m = href.match(/row=(\d+)[^&]*&[^&]*col=(\d+)[^&]*&[^&]*side=([A-Z])/);
+        if (m) {
+            console.log('Click extracted:', m[1], m[2], m[3]);
+            sendClick(m[1], m[2], m[3]);
+        } else {
+            console.log('No row/col/side in href:', href);
+        }
+    }, true);
+
+    function formatTime(sec) {
+        if (sec < 60) return sec + 's';
+        return Math.floor(sec / 60) + 'm ' + (sec % 60) + 's';
+    }
+
+    function showWinModal(moves, duration) {
+        document.getElementById('win-moves').textContent = moves;
+        document.getElementById('win-duration').textContent = formatTime(duration);
+        document.getElementById('win-modal').style.display = 'flex';
+    }
+
+    function showLeftModal() {
+        document.getElementById('left-modal').style.display = 'flex';
+        setTimeout(() => {
+            window.location.href = '/slitherlink/lobby/coop/' + COOP_TOKEN;
+        }, 2000);
+    }
+
+    async function sendClick(row, col, side) {
+        const now = Date.now();
+        if (now - lastClickTime < 100) return;
+        lastClickTime = now;
+
+        try {
+            const formData = new FormData();
+            formData.append('row', row);
+            formData.append('col', col);
+            formData.append('side', side);
+            await fetch('/api/coop/' + COOP_TOKEN + '/click', {
+                method: 'POST',
+                body: formData
+            });
+            poll();
+        } catch (e) { }
+    }
+
+    async function poll() {
+        try {
+            const res = await fetch('/api/coop/' + COOP_TOKEN, { cache: 'no-store' });
+            const data = await res.json();
+
+            if (data.status === 'ended') {
+                statusEl.style.color = 'var(--accent-pink)';
+                statusEl.textContent = '● ended';
+                clearInterval(pollInterval);
+                fieldEl.innerHTML = '<p class="text-dim">Game ended.</p>';
+                return;
+            }
+
+            if (data.status === 'creator_left') {
+                clearInterval(pollInterval);
+                showLeftModal();
+                return;
+            }
+
+            if (data.status === 'won') {
+                statusEl.style.color = 'var(--neon-green)';
+                statusEl.textContent = '● solved!';
+                clearInterval(pollInterval);
+                showWinModal(data.moves, data.duration);
+                return;
+            }
+
+            if (data.status !== 'playing') return;
+
+            statusEl.style.color = 'var(--neon-green)';
+            statusEl.textContent = '● live';
+
+            if (creatorStatusEl) {
+                if (IS_CREATOR) {
+                    creatorStatusEl.textContent = '(you)';
+                    creatorStatusEl.style.color = 'var(--text-dim)';
+                } else {
+                    creatorStatusEl.textContent = data.creatorOnline ? '● online' : '● offline';
+                    creatorStatusEl.style.color = data.creatorOnline ? 'var(--neon-green)' : 'var(--accent-pink)';
+                }
+            }
+
+            movesEl.textContent = data.moves;
+            timerEl.textContent = formatTime(data.elapsed);
+
+            if (data.htmlField && pendingRender) {
+                fieldEl.innerHTML = data.htmlField;
+                pendingRender = false;
+            } else if (data.htmlField) {
+                const current = fieldEl.innerHTML;
+                if (current !== data.htmlField) {
+                    fieldEl.innerHTML = data.htmlField;
+                }
+            }
+
+            if (data.activePlayers && activePlayersEl) {
+                activePlayersEl.innerHTML = '';
+                for (const p of data.activePlayers) {
+                    const el = document.createElement('span');
+                    el.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:0.7rem;';
+                    const dot = document.createElement('span');
+                    dot.style.cssText = 'width:7px;height:7px;border-radius:50%;'
+                        + (p.active ? 'background:#00ff88;box-shadow:0 0 6px #00ff88;' : 'background:#555;');
+                    el.appendChild(dot);
+                    const name = document.createElement('span');
+                    name.textContent = p.username;
+                    if (!p.active) name.style.color = 'var(--text-dim)';
+                    el.appendChild(name);
+                    activePlayersEl.appendChild(el);
+                }
+            }
+        } catch (e) {
+            statusEl.style.color = 'var(--accent-pink)';
+            statusEl.textContent = '● connection error';
+        }
+    }
+
+    poll();
+    pollInterval = setInterval(poll, 1000);
+</script>
+</body>
+</html>

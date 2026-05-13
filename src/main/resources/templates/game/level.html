@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Choose a level')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">LEVEL</div>
+        <p class="text-dim" style="margin-bottom: 32px;">
+            Welcome, <span th:text="${playerName}" style="color: var(--neon-blue);">Player</span>!
+            Choose difficulty you wanna beat:
+        </p>
+
+        <div class="level-cards">
+
+            <!--2x2-->
+            <div class="level-card">
+                <span class="level-size">2×2</span>
+                <span class="level-label">Beginner</span>
+
+                <div th:if="${saved0 != null}" style="margin-top: 12px; font-size: 0.6rem; color: var(--text-dim);">
+                    Paused game
+                    <div style="color: var(--accent-yellow); margin: 4px 0;">
+                        <span th:text="${saved0.moves} + ' moves'">0 moves</span>
+                        · <span th:text="${saved0.elapsed} + 's'">0 s</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: center;">
+                        <a href="/slitherlink/new?level=0" class="btn btn-blue"
+                           style="font-size: 0.55rem; padding: 6px 10px;">▶ Resume</a>
+                        <a href="/slitherlink/new?level=0&fresh=true" class="btn btn-pink"
+                           style="font-size: 0.55rem; padding: 6px 10px;">↺ Again</a>
+                    </div>
+                </div>
+                <div th:unless="${saved0 != null}" style="margin-top: 12px;">
+                    <a href="/slitherlink/new?level=0" class="btn btn-blue"
+                       style="font-size: 0.55rem; padding: 6px 10px;">▶ Play</a>
+                </div>
+            </div>
+
+            <!--5x5-->
+            <div class="level-card">
+                <span class="level-size">5×5</span>
+                <span class="level-label">Medium</span>
+
+                <div th:if="${saved1 != null}" style="margin-top: 12px; font-size: 0.6rem; color: var(--text-dim);">
+                    Paused game
+                    <div style="color: var(--accent-yellow); margin: 4px 0;">
+                        <span th:text="${saved1.moves} + ' moves'">0 moves</span>
+                        · <span th:text="${saved1.elapsed} + 's'">0 s</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: center;">
+                        <a href="/slitherlink/new?level=1" class="btn btn-blue"
+                           style="font-size: 0.55rem; padding: 6px 10px;">▶ Resume</a>
+                        <a href="/slitherlink/new?level=1&fresh=true" class="btn btn-pink"
+                           style="font-size: 0.55rem; padding: 6px 10px;">↺ Again</a>
+                    </div>
+                </div>
+                <div th:unless="${saved1 != null}" style="margin-top: 12px;">
+                    <a href="/slitherlink/new?level=1" class="btn btn-blue"
+                       style="font-size: 0.55rem; padding: 6px 10px;">▶ Play</a>
+                </div>
+            </div>
+
+            <!--7x7-->
+            <div class="level-card">
+                <span class="level-size">7×7</span>
+                <span class="level-label">Hardcore</span>
+
+                <div th:if="${saved2 != null}" style="margin-top: 12px; font-size: 0.6rem; color: var(--text-dim);">
+                    Paused game
+                    <div style="color: var(--accent-yellow); margin: 4px 0;">
+                        <span th:text="${saved2.moves} + ' moves'">0 moves</span>
+                        · <span th:text="${saved2.elapsed} + 's'">0 s</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: center;">
+                        <a href="/slitherlink/new?level=2" class="btn btn-blue"
+                           style="font-size: 0.55rem; padding: 6px 10px;">▶ Resume</a>
+                        <a href="/slitherlink/new?level=2&fresh=true" class="btn btn-pink"
+                           style="font-size: 0.55rem; padding: 6px 10px;">↺ Again</a>
+                    </div>
+                </div>
+                <div th:unless="${saved2 != null}" style="margin-top: 12px;">
+                    <a href="/slitherlink/new?level=2" class="btn btn-blue"
+                       style="font-size: 0.55rem; padding: 6px 10px;">▶ Play</a>
+                </div>
+            </div>
+
+            <!--10x10-->
+            <div class="level-card">
+                <span class="level-size">10×10</span>
+                <span class="level-label">Expert</span>
+
+                <div th:if="${saved3 != null}" style="margin-top: 12px; font-size: 0.6rem; color: var(--text-dim);">
+                    Paused game
+                    <div style="color: var(--accent-yellow); margin: 4px 0;">
+                        <span th:text="${saved3.moves} + ' moves'">0 moves</span>
+                        · <span th:text="${saved3.elapsed} + 's'">0 s</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: center;">
+                        <a href="/slitherlink/new?level=3" class="btn btn-blue"
+                           style="font-size: 0.55rem; padding: 6px 10px;">▶ Resume</a>
+                        <a href="/slitherlink/new?level=3&fresh=true" class="btn btn-pink"
+                           style="font-size: 0.55rem; padding: 6px 10px;">↺ Again</a>
+                    </div>
+                </div>
+                <div th:unless="${saved3 != null}" style="margin-top: 12px;">
+                    <a href="/slitherlink/new?level=3" class="btn btn-blue"
+                       style="font-size: 0.55rem; padding: 6px 10px;">▶ Play</a>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${param.failed != null}" class="error-msg" style="margin-bottom: 20px; font-size: 0.8rem;">
+            <span th:if="${param.failed[0] == 'time'}">Time's up! Better luck next time!</span>
+            <span th:if="${param.failed[0] == 'moves'}">You ran out of moves! Better luck next time!</span>
+            <span th:if="${param.failed[0] == 'unknown'}">⚠ Game over! Better luck next time!</span>
+        </div>
+
+        <!-- MULTIPLAYER -->
+        <div class="card" style="max-width: 700px; margin-top: 24px;">
+            <div class="section-title pink mb-8">🎮 MULTIPLAYER</div>
+
+            <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 16px;">
+                Play together with friends — choose mode and difficulty.
+            </p>
+
+            <!-- RACE -->
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px;">
+                <span style="font-size: 0.9rem; color: var(--neon-pink); width: 80px;">⚔ RACE</span>
+
+                <div th:if="${myRaceLobby != null}"
+                     style="display: flex; gap: 8px; align-items: center;">
+                    <a th:href="@{'/slitherlink/lobby/race/' + ${myRaceLobby.token}}"
+                       class="btn btn-pink" style="font-size: 0.65rem;">↩ Return to lobby</a>
+                    <a th:href="@{'/slitherlink/lobby/' + ${myRaceLobby.token} + '/cancel'}"
+                       class="btn btn-yellow" style="font-size: 0.65rem;">✕ Close</a>
+                    <span class="text-dim" style="font-size: 0.6rem;"
+                          th:text="'(' + ${myRaceLobby.level == 0 ? '2×2' : (myRaceLobby.level == 1 ? '5×5' : (myRaceLobby.level == 2 ? '7×7' : '10×10'))} + ')'">5×5</span>
+                </div>
+
+                <form th:unless="${myRaceLobby != null}"
+                      action="/slitherlink/lobby/create" method="post"
+                      style="display: flex; gap: 8px; align-items: center;">
+                    <input type="hidden" name="mode" value="RACE"/>
+                    <select name="level" class="form-input" style="font-size: 0.7rem; padding: 6px 10px;">
+                        <option value="0">2×2</option>
+                        <option value="1" selected>5×5</option>
+                        <option value="2">7×7</option>
+                        <option value="3">10×10</option>
+                    </select>
+                    <button type="submit" class="btn btn-pink" style="font-size: 0.65rem;">
+                        + Create RACE
+                    </button>
+                </form>
+            </div>
+
+            <!-- COOP -->
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="font-size: 0.9rem; color: var(--neon-blue); width: 80px;">🤝 CO-OP</span>
+
+                <div th:if="${myCoopLobby != null}"
+                     style="display: flex; gap: 8px; align-items: center;">
+                    <a th:href="@{'/slitherlink/lobby/coop/' + ${myCoopLobby.token}}"
+                       class="btn btn-blue" style="font-size: 0.65rem;">↩ Return to lobby</a>
+                    <a th:href="@{'/slitherlink/lobby/' + ${myCoopLobby.token} + '/cancel'}"
+                       class="btn btn-yellow" style="font-size: 0.65rem;">✕ Close</a>
+                    <span class="text-dim" style="font-size: 0.6rem;"
+                          th:text="'(' + ${myCoopLobby.level == 0 ? '2×2' : (myCoopLobby.level == 1 ? '5×5' : (myCoopLobby.level == 2 ? '7×7' : '10×10'))} + ')'">5×5</span>
+                </div>
+
+                <form th:unless="${myCoopLobby != null}"
+                      action="/slitherlink/lobby/create" method="post"
+                      style="display: flex; gap: 8px; align-items: center;">
+                    <input type="hidden" name="mode" value="COOP"/>
+                    <select name="level" class="form-input" style="font-size: 0.7rem; padding: 6px 10px;">
+                        <option value="0">2×2</option>
+                        <option value="1" selected>5×5</option>
+                        <option value="2">7×7</option>
+                        <option value="3">10×10</option>
+                    </select>
+                    <button type="submit" class="btn btn-blue" style="font-size: 0.65rem;">
+                        + Create CO-OP
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <p class="text-dim" style="margin-top: 24px; font-size: 0.6rem;">
+            Game has autosave! Your score starts to count after firts move!
+        </p>
+
+    </main>
+</div>
+</body>
+</html>

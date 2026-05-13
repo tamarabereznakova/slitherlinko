@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">SLITHERLINK</div>
+
+        <div class="card">
+            <div class="section-title blue mb-8">Welcome!</div>
+            <p class="text-dim" style="margin-bottom: 24px;">
+                Have you ever played before ?
+            </p>
+
+            <form action="/login" method="post" id="loginForm">
+                <input type="hidden" name="spectate" th:value="${param.spectate}"/>
+                <div class="form-group">
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="returning" value="yes"
+                                   th:checked="${returningParam == 'yes'}"/>
+                            Yes, I have
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="returning" value="no"
+                                   th:checked="${returningParam != 'yes'}"/>
+                            No, I am new here
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="name" id="nameInput" class="form-input" placeholder="Type in your name..."
+                           autocomplete="off" maxlength="10"/>
+                    <small class="text-dim" style="font-size: 0.6rem; margin-top: 4px; display: block;">
+                        Max 10 symbols
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" name="password" id="passwordInput" class="form-input"
+                               placeholder="Type in your password..."
+                               autocomplete="off" maxlength="10"
+                               style="padding-right: 40px;"/>
+                        <span onclick="togglePassword('passwordInput', this)"
+                              style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+                     cursor: pointer; font-size: 0.9rem; color: var(--text-dim);
+                     user-select: none; line-height: 1;">👁</span>
+                    </div>
+                    <small class="text-dim" style="font-size: 0.6rem; margin-top: 4px; display: block;">
+                        4 - 10 symbols
+                    </small>
+                    <small class="error-msg" style="display: block; margin-top: 6px;">
+                        ⚠ Remember, we cannot renew your password if you forget it!
+                    </small>
+                </div>
+
+                <!--ERR-->
+                <div id="client-error" class="error-msg" style="display:none; margin-bottom: 16px;"></div>
+
+                <div id="server-errors">
+                    <div th:if="${error == 'notfound'}" class="error-msg" style="margin-bottom: 16px;">
+                        ⚠ Player with this name does not exist!
+                    </div>
+                    <div th:if="${error == 'exists'}" class="error-msg" style="margin-bottom: 16px;">
+                        ⚠ This name is already in use! Choose another one!
+                    </div>
+                    <div th:if="${error == 'wrongpassword'}" class="error-msg" style="margin-bottom: 16px;">
+                        ⚠ Wrong password!
+                    </div>
+                    <div th:if="${error == 'invalidname'}" class="error-msg" style="margin-bottom: 16px;">
+                        ⚠ The name has to have 1 - 10 symbols!
+                    </div>
+                    <div th:if="${error == 'invalidpassword'}" class="error-msg" style="margin-bottom: 16px;">
+                        ⚠ The password has to have 4 - 10 symbols!
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-blue" onclick="submitForm()">
+                    Enter →
+                </button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    async function validateForm() {
+        const name = document.getElementById('nameInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        const returning = document.querySelector('input[name="returning"]:checked').value;
+        const errorDiv = document.getElementById('client-error');
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+
+        if (name.length === 0) {
+            errorDiv.textContent = '⚠ Name is required!';
+            errorDiv.style.display = 'block';
+            document.getElementById('nameInput').focus();
+            return false;
+        }
+        if (name.length > 10) {
+            errorDiv.textContent = '⚠ Name cannot have more than 10 symbols!';
+            errorDiv.style.display = 'block';
+            document.getElementById('nameInput').focus();
+            return false;
+        }
+
+        const response = await fetch('/slitherlink/checkname?name=' + encodeURIComponent(name) + '&returning=' + returning);
+        const exists = await response.json();
+        if (returning === 'yes' && !exists) {
+            errorDiv.textContent = '⚠ Player with this name does not exist yet!';
+            errorDiv.style.display = 'block';
+            document.getElementById('nameInput').focus();
+            return false;
+        }
+        if (returning === 'no' && exists) {
+            errorDiv.textContent = '⚠ This name is already in use! Choose another one!';
+            errorDiv.style.display = 'block';
+            document.getElementById('nameInput').focus();
+            return false;
+        }
+
+        if (password.length < 4) {
+            errorDiv.textContent = '⚠ Password needs to be at least 4 symbols long!';
+            errorDiv.style.display = 'block';
+            document.getElementById('passwordInput').focus();
+            return false;
+        }
+        if (password.length > 10) {
+            errorDiv.textContent = '⚠ Password cannot be more than  10 symbols long!';
+            errorDiv.style.display = 'block';
+            document.getElementById('passwordInput').focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    document.querySelectorAll('input[name="returning"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            document.getElementById('client-error').style.display = 'none';
+            document.getElementById('server-errors').style.display = 'none';
+        });
+    });
+
+    async function submitForm() {
+        const valid = await validateForm();
+        if (valid) {
+            document.getElementById('loginForm').submit();
+        }
+    }
+
+    function togglePassword(fieldId, icon) {
+        const input = document.getElementById(fieldId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.style.color = 'var(--neon-blue)';
+        } else {
+            input.type = 'password';
+            icon.style.color = 'var(--text-dim)';
+        }
+    }
+</script>
+</body>
+</html>

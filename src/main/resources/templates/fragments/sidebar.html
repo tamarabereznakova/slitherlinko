@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+        <!--LOGO, NADPIS-->
+        <a href="/slitherlink/rules" class="snake-logo-link">
+            <div class="snake-logo">
+                <div class="snake-title">SLITHERLINK</div>
+                <img id="snake-logo-img" th:src="@{/images/snake.png}" style="width: 64px; height: 64px; filter: drop-shadow(0 0 12px #00ff88) drop-shadow(0 0 24px #00ff88); animation: snakePulse 2s ease-in-out infinite;" alt="snake"/>
+            </div>
+        </a>
+
+        <!--HRAC-->
+        <div class="player-info" th:if="${playerName != null}">
+            <a href="/slitherlink/profile" class="player-name">
+                ⚡ <span th:text="${playerName}">Player</span>
+            </a>
+            <a href="/logout" class="btn btn-pink" onclick="localStorage.removeItem('theme');">EXIT</a>
+        </div>
+        <div th:if="${playerName == null}" class="player-info-empty">
+            <a href="/home" class="btn btn-blue" style="width: 100%; text-align: center;">
+                Log in/Sign Up →
+            </a>
+        </div>
+
+        <script>
+            function switchTheme(theme) {
+                localStorage.setItem('theme', theme);
+                const link = document.getElementById('theme-css');
+                link.href = theme === 'pastel' ? '/css/style-pastel.css' : '/css/style.css';
+            }
+        </script>
+
+        <hr class="divider"/>
+
+        <!--LVL-->
+        <div style="padding: 10px 16px;" th:if="${playerName != null}">
+            <a href="/slitherlink/level" class="btn btn-yellow"
+               style="width: 100%; text-align: center; display: block;">
+                Choose LEVEL
+            </a>
+        </div>
+        <div style="padding: 10px 16px;" th:if="${playerName == null}">
+    <span class="text-dim" style="font-size: 0.65rem;">
+        You need to be logged in to play.
+    </span>
+        </div>
+
+        <hr class="divider"/>
+
+        <!--TOP SKORE-->
+        <div class="scores-section">
+            <div class="section-title yellow">TOP players</div>
+
+            <div class="level-tabs">
+                <button class="level-tab active" onclick="showTab(0)" id="tab0">2×2</button>
+                <button class="level-tab" onclick="showTab(1)" id="tab1">5×5</button>
+                <button class="level-tab" onclick="showTab(2)" id="tab2">7×7</button>
+                <button class="level-tab" onclick="showTab(3)" id="tab3">10×10</button>
+            </div>
+
+            <!--2x2-->
+            <ul class="score-list" id="scores0">
+                <th:block th:with="items=${scores0}">
+                    <th:block th:each="i : ${#numbers.sequence(0, 9)}">
+                        <li class="score-item" th:if="${i < #lists.size(items)}"
+                            th:title="${#dates.format(items[i].playedOn, 'd. M. yyyy')}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name" th:text="${items[i].player}" th:classappend="${followingNames.contains(items[i].player)} ? ' follow-glow' : ''">Player</span>
+                            <span class="stats">
+                    <span class="stat-moves" th:text="${items[i].moves} + ' moves'">0 moves</span>
+                    <span class="stat-sep">·</span>
+                    <span class="stat-time" th:text="${items[i].duration >= 60} ? (${items[i].duration / 60} + 'm ' + ${items[i].duration % 60} + 's') : (${items[i].duration} + 's')">0s</span>
+                </span>
+                        </li>
+                        <li class="score-item empty" th:unless="${i < #lists.size(items)}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name text-dim">---</span>
+                            <span class="stats text-dim">-</span>
+                        </li>
+                    </th:block>
+                </th:block>
+            </ul>
+
+            <!--5x5-->
+            <ul class="score-list" id="scores1" style="display:none">
+                <th:block th:with="items=${scores1}">
+                    <th:block th:each="i : ${#numbers.sequence(0, 9)}">
+                        <li class="score-item" th:if="${i < #lists.size(items)}"
+                            th:title="${#dates.format(items[i].playedOn, 'd. M. yyyy')}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name" th:text="${items[i].player}" th:classappend="${followingNames.contains(items[i].player)} ? ' follow-glow' : ''">Player</span>
+                            <span class="stats">
+                    <span class="stat-moves" th:text="${items[i].moves} + ' moves'">0 moves</span>
+                    <span class="stat-sep">·</span>
+                    <span class="stat-time" th:text="${items[i].duration >= 60} ? (${items[i].duration / 60} + 'm ' + ${items[i].duration % 60} + 's') : (${items[i].duration} + 's')">0s</span>
+                </span>
+                        </li>
+                        <li class="score-item empty" th:unless="${i < #lists.size(items)}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name text-dim">---</span>
+                            <span class="stats text-dim">-</span>
+                        </li>
+                    </th:block>
+                </th:block>
+            </ul>
+
+            <!--7x7-->
+            <ul class="score-list" id="scores2" style="display:none">
+                <th:block th:with="items=${scores2}">
+                    <th:block th:each="i : ${#numbers.sequence(0, 9)}">
+                        <li class="score-item" th:if="${i < #lists.size(items)}"
+                            th:title="${#dates.format(items[i].playedOn, 'd. M. yyyy')}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name" th:text="${items[i].player}" th:classappend="${followingNames.contains(items[i].player)} ? ' follow-glow' : ''">Player</span>
+                            <span class="stats">
+                    <span class="stat-moves" th:text="${items[i].moves} + ' moves'">0 moves</span>
+                    <span class="stat-sep">·</span>
+                    <span class="stat-time" th:text="${items[i].duration >= 60} ? (${items[i].duration / 60} + 'm ' + ${items[i].duration % 60} + 's') : (${items[i].duration} + 's')">0s</span>
+                </span>
+                        </li>
+                        <li class="score-item empty" th:unless="${i < #lists.size(items)}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name text-dim">---</span>
+                            <span class="stats text-dim">-</span>
+                        </li>
+                    </th:block>
+                </th:block>
+            </ul>
+
+            <!--10x10-->
+            <ul class="score-list" id="scores3" style="display:none">
+                <th:block th:with="items=${scores3}">
+                    <th:block th:each="i : ${#numbers.sequence(0, 9)}">
+                        <li class="score-item" th:if="${i < #lists.size(items)}"
+                            th:title="${#dates.format(items[i].playedOn, 'd. M. yyyy')}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name" th:text="${items[i].player}" th:classappend="${followingNames.contains(items[i].player)} ? ' follow-glow' : ''">Player</span>
+                            <span class="stats">
+                    <span class="stat-moves" th:text="${items[i].moves} + ' moves'">0 moves</span>
+                    <span class="stat-sep">·</span>
+                    <span class="stat-time" th:text="${items[i].duration} + 's'">0s</span>
+                </span>
+                        </li>
+                        <li class="score-item empty" th:unless="${i < #lists.size(items)}">
+                            <span class="rank" th:text="${i + 1} + '.'">1.</span>
+                            <span class="name text-dim">---</span>
+                            <span class="stats text-dim">-</span>
+                        </li>
+                    </th:block>
+                </th:block>
+            </ul>
+        </div>
+
+        <hr class="divider"/>
+
+        <!--RATING-->
+        <div class="rating-section">
+            <div class="section-title blue">Rating</div>
+            <div class="avg-rating">
+                ⭐ <span th:text="${avgRating}">0</span> / 5
+            </div>
+
+            <div th:if="${playerName == null}" class="text-dim">
+                Log in to leave rating.
+            </div>
+            <div th:if="${playerName != null and !hasPlayed}" class="text-dim">
+                Play at least once to leave rating.
+            </div>
+            <div th:if="${playerName != null and hasPlayed}">
+                <div class="text-dim mb-8">Your rating:</div>
+                <div class="stars">
+                    <a th:each="i : ${#numbers.sequence(1, 5)}"
+                       th:href="@{/slitherlink/rate(rating=${i}, from=${#httpServletRequest.requestURI})}"
+                       th:class="${i <= myRating} ? 'star active' : 'star'"
+                       th:text="${i <= myRating} ? '★' : '☆'">☆</a>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider"/>
+
+        <!--KOMENTARE-->
+        <div class="comments-section">
+            <div class="section-title pink">Comment section</div>
+
+            <div class="comments-scroll-box">
+                <div th:if="${#lists.isEmpty(comments)}" class="text-dim mb-8">
+                    No comments yet.
+                </div>
+                <div class="comment-item" th:each="c : ${comments}"
+                     th:title="${#dates.format(c.commentedOn, 'd. M. yyyy HH:mm')}">
+                    <div class="comment-player"
+                         th:text="${c.player}"
+                         th:classappend="${followingNames.contains(c.player)} ? ' follow-glow' : ''">Player</div>
+                    <div class="comment-text" th:text="${c.text}">Comment</div>
+                </div>
+            </div>
+
+            <div th:if="${playerName == null}" class="text-dim mt-16">
+                Log in to leave a comment.
+            </div>
+            <div th:if="${playerName != null and !hasPlayed}" class="text-dim mt-16">
+                Play at least once to leave a comment.
+            </div>
+            <div th:if="${playerName != null and hasPlayed}" class="mt-16">
+                <form th:action="@{/slitherlink/comment}" method="post" class="comment-form">
+                    <input type="hidden" name="from"
+                           th:value="${#httpServletRequest.requestURI}"/>
+                    <textarea name="text" placeholder="Leave a comment"
+                              maxlength="30"
+                              oninput="
+                            const n = this.value.length;
+                            const c = this.nextElementSibling;
+                            c.textContent = n + '/30';
+                            c.className = 'comment-char-counter' + (n >= 30 ? ' danger' : n >= 20 ? ' warning' : '');
+                          "></textarea>
+                    <div class="comment-char-counter">0/30</div>
+                    <button type="submit" class="btn btn-pink">Post</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function showTab(level) {
+            document.getElementById('scores0').style.display = 'none';
+            document.getElementById('scores1').style.display = 'none';
+            document.getElementById('scores2').style.display = 'none';
+            document.getElementById('scores3').style.display = 'none';
+            document.getElementById('tab0').classList.remove('active');
+            document.getElementById('tab1').classList.remove('active');
+            document.getElementById('tab2').classList.remove('active');
+            document.getElementById('tab3').classList.remove('active');
+            document.getElementById('scores' + level).style.display = 'block';
+            document.getElementById('tab' + level).classList.add('active');
+        }
+
+        function switchTheme(theme) {
+            localStorage.setItem('theme', theme);
+            const link = document.getElementById('theme-css');
+            link.href = theme === 'pastel' ? '/css/style-pastel.css' : '/css/style.css';
+            updateLogo(theme);
+        }
+
+        function updateLogo(theme) {
+            const logo = document.getElementById('snake-logo-img');
+            if (logo) {
+                logo.src = theme === 'pastel' ? '/images/snake2.png' : '/images/snake.png';
+            }
+        }
+
+        const currentTheme = localStorage.getItem('theme') || 'neon';
+        updateLogo(currentTheme);
+    </script>
+
+    <style>
+        .name.follow-glow,
+        .comment-player.follow-glow {
+            color: var(--neon-pink) !important;
+            transition: all 0.3s ease;
+        }
+        .name.follow-glow:hover,
+        .comment-player.follow-glow:hover {
+            text-shadow: 0 0 8px var(--neon-pink), 0 0 16px var(--neon-pink), 0 0 24px var(--neon-pink);
+            animation: followGlowPulse 0.8s ease-in-out infinite;
+        }
+        @keyframes followGlowPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+
+</aside>
+</body>
+</html>

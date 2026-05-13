@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Race')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">⚔ RACE — <span th:text="${levelName}">5×5</span></div>
+
+        <div class="game-info" style="margin-bottom: 16px;">
+            <span>👤 You: <strong th:text="${playerName}" style="color: var(--neon-blue);">Player</strong></span>
+            <span>⚔ Opponent: <strong th:text="${opponentName}" style="color: var(--neon-pink);">Opponent</strong>
+                <span id="opponent-status" style="font-size: 0.6rem; margin-left: 4px;"></span>
+            </span>
+            <span>Moves: <strong id="race-moves">0</strong></span>
+            <span>⏱ Time: <strong id="race-timer">0s</strong></span>
+            <span id="race-status" style="font-size: 0.65rem; color: var(--accent-yellow);">● connecting...</span>
+        </div>
+
+        <div class="card" style="max-width: 700px; padding: 12px 16px; margin-bottom: 16px;">
+            <div style="margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; margin-bottom: 4px;">
+                    <span style="color: var(--neon-blue);">👤 YOU</span>
+                    <span><strong id="my-progress-pct">0</strong>%</span>
+                </div>
+                <div style="background: var(--bg-card2); height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="my-progress-bar"
+                         style="height: 100%; width: 0%; background: var(--neon-blue);
+                                box-shadow: 0 0 8px var(--neon-blue); transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; margin-bottom: 4px;">
+                    <span style="color: var(--neon-pink);">⚔ <strong th:text="${opponentName}">opponent</strong></span>
+                    <span><strong id="opp-progress-pct">0</strong>%</span>
+                </div>
+                <div style="background: var(--bg-card2); height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="opp-progress-bar"
+                         style="height: 100%; width: 0%; background: var(--neon-pink);
+                                box-shadow: 0 0 8px var(--neon-pink); transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="race-field">
+            <p class="text-dim" style="font-size: 0.75rem;">Loading game...</p>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <a th:href="@{'/slitherlink/race/' + ${token} + '/leave'}"
+               class="btn btn-pink" style="font-size: 0.65rem;">← Leave race</a>
+        </div>
+
+        <div id="win-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+             z-index:1000; justify-content:center; align-items:center;">
+            <div class="card" style="max-width: 500px; width: 90%; text-align: center;">
+                <div class="section-title" style="color: var(--neon-green); font-size: 1.5rem;">
+                    HOORAY VICTORY!
+                </div>
+                <p style="font-size: 0.85rem; margin: 16px 0;">
+                    You beat <strong id="win-opponent">opponent</strong>!
+                </p>
+                <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 20px;">
+                    <strong id="win-moves">0</strong> moves ·
+                    <strong id="win-duration">0s</strong>
+                </p>
+                <a th:href="@{'/slitherlink/lobby/race/' + ${token}}"
+                   class="btn btn-blue" style="font-size: 0.7rem;">← Back to lobby</a>
+            </div>
+        </div>
+
+        <div id="lose-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+             z-index:1000; justify-content:center; align-items:center;">
+            <div class="card" style="max-width: 500px; width: 90%; text-align: center;">
+                <div class="section-title pink" style="font-size: 1.5rem;">
+                    YOU LOST !
+                </div>
+                <p style="font-size: 0.85rem; margin: 16px 0;">
+                    <strong id="lose-winner">winner</strong> solved it first!
+                </p>
+                <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 20px;">
+                    Your progress: <strong id="lose-progress">0</strong>%
+                </p>
+                <a th:href="@{'/slitherlink/lobby/race/' + ${token}}"
+                   class="btn btn-blue" style="font-size: 0.7rem;">← Back to lobby</a>
+            </div>
+        </div>
+
+        <div id="left-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+             z-index:1000; justify-content:center; align-items:center;">
+            <div class="card" style="max-width: 500px; width: 90%; text-align: center;">
+                <div class="section-title pink" style="font-size: 1.2rem;">
+                    Opponent left
+                </div>
+                <p class="text-dim" style="font-size: 0.75rem; margin: 16px 0;">
+                    <strong id="left-opponent">opponent</strong> has left the race. Returning to lobby...
+                </p>
+                <a th:href="@{'/slitherlink/lobby/race/' + ${token}}"
+                   class="btn btn-blue" style="font-size: 0.7rem;">← To lobby</a>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const RACE_TOKEN = '[[${token}]]';
+    const ME = '[[${playerName}]]';
+    const OPPONENT = '[[${opponentName}]]';
+
+    const fieldEl = document.getElementById('race-field');
+    const movesEl = document.getElementById('race-moves');
+    const timerEl = document.getElementById('race-timer');
+    const statusEl = document.getElementById('race-status');
+    const oppStatusEl = document.getElementById('opponent-status');
+
+    const myProgressBar = document.getElementById('my-progress-bar');
+    const myProgressPct = document.getElementById('my-progress-pct');
+    const oppProgressBar = document.getElementById('opp-progress-bar');
+    const oppProgressPct = document.getElementById('opp-progress-pct');
+
+    let pollInterval = null;
+    let lastClickTime = 0;
+    let lastHtmlField = '';
+
+    document.getElementById('race-field').addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const href = link.getAttribute('href') || '';
+        const m = href.match(/row=(\d+)[^&]*&[^&]*col=(\d+)[^&]*&[^&]*side=([A-Z])/);
+        if (m) {
+            sendClick(m[1], m[2], m[3]);
+        }
+    }, true);
+
+    function formatTime(sec) {
+        if (sec < 60) return sec + 's';
+        return Math.floor(sec / 60) + 'm ' + (sec % 60) + 's';
+    }
+
+    function showWinModal(opponentName, moves, duration) {
+        document.getElementById('win-opponent').textContent = opponentName;
+        document.getElementById('win-moves').textContent = moves;
+        document.getElementById('win-duration').textContent = formatTime(duration);
+        document.getElementById('win-modal').style.display = 'flex';
+    }
+
+    function showLoseModal(winnerName, progress) {
+        document.getElementById('lose-winner').textContent = winnerName;
+        document.getElementById('lose-progress').textContent = progress;
+        document.getElementById('lose-modal').style.display = 'flex';
+    }
+
+    function showLeftModal(opponentName) {
+        document.getElementById('left-opponent').textContent = opponentName;
+        document.getElementById('left-modal').style.display = 'flex';
+        setTimeout(() => {
+            window.location.href = '/slitherlink/lobby/race/' + RACE_TOKEN;
+        }, 3000);
+    }
+
+    async function sendClick(row, col, side) {
+        const now = Date.now();
+        if (now - lastClickTime < 100) return;
+        lastClickTime = now;
+
+        try {
+            const formData = new FormData();
+            formData.append('row', row);
+            formData.append('col', col);
+            formData.append('side', side);
+            await fetch('/api/race/' + RACE_TOKEN + '/click', {
+                method: 'POST',
+                body: formData
+            });
+            poll();
+        } catch (e) {}
+    }
+
+    async function poll() {
+        try {
+            const res = await fetch('/api/race/' + RACE_TOKEN, { cache: 'no-store' });
+            const data = await res.json();
+
+            if (data.status === 'ended') {
+                statusEl.style.color = 'var(--accent-pink)';
+                statusEl.textContent = '● ended';
+                clearInterval(pollInterval);
+                fieldEl.innerHTML = '<p class="text-dim">Game ended.</p>';
+                return;
+            }
+
+            if (data.status === 'opponent_left') {
+                clearInterval(pollInterval);
+                showLeftModal(data.opponent);
+                return;
+            }
+
+            if (data.status === 'won') {
+                statusEl.style.color = 'var(--neon-green)';
+                statusEl.textContent = '● you won!';
+                clearInterval(pollInterval);
+                showWinModal(OPPONENT, data.myMoves, data.duration);
+                return;
+            }
+
+            if (data.status === 'lost') {
+                statusEl.style.color = 'var(--accent-pink)';
+                statusEl.textContent = '● you lost';
+                clearInterval(pollInterval);
+                showLoseModal(data.winner, data.myProgress);
+                return;
+            }
+
+            if (data.status !== 'playing') return;
+
+            statusEl.style.color = 'var(--neon-green)';
+            statusEl.textContent = '● live';
+
+            if (oppStatusEl) {
+                oppStatusEl.textContent = data.opponentOnline ? '● online' : '● offline';
+                oppStatusEl.style.color = data.opponentOnline ? 'var(--neon-green)' : 'var(--accent-pink)';
+            }
+
+            movesEl.textContent = data.moves;
+            timerEl.textContent = formatTime(data.elapsed);
+
+            myProgressBar.style.width = data.myProgress + '%';
+            myProgressPct.textContent = data.myProgress;
+            oppProgressBar.style.width = data.opponentProgress + '%';
+            oppProgressPct.textContent = data.opponentProgress;
+
+            if (data.htmlField && data.htmlField !== lastHtmlField) {
+                fieldEl.innerHTML = data.htmlField;
+                lastHtmlField = data.htmlField;
+            }
+        } catch (e) {
+            statusEl.style.color = 'var(--accent-pink)';
+            statusEl.textContent = '● connection error';
+        }
+    }
+
+    poll();
+    pollInterval = setInterval(poll, 1000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Mailbox')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">MAILBOX</div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 24px;">
+            <a href="/slitherlink/inbox"
+               class="btn"
+               th:classappend="${isInbox} ? 'btn-blue' : 'btn-yellow'"
+               style="font-size: 0.65rem;">Inbox</a>
+            <a href="/slitherlink/outbox"
+               class="btn"
+               th:classappend="${!isInbox} ? 'btn-blue' : 'btn-yellow'"
+               style="font-size: 0.65rem;">Outbox</a>
+        </div>
+
+        <div class="card" style="max-width: 700px;">
+
+            <!-- INBOX -->
+            <div th:if="${isInbox}">
+                <div class="section-title blue mb-8">Received spectate links</div>
+
+                <div th:if="${#lists.isEmpty(messages)}" class="text-dim" style="font-size: 0.75rem;">
+                    No messages yet.
+                </div>
+
+                <div th:each="msg : ${messages}"
+                     style="display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid var(--divider-color);"
+                     th:classappend="${msg.inviteType == 'LOBBY_RACE'} ? 'invite-race' :
+                     (${msg.inviteType == 'LOBBY_COOP'} ? 'invite-coop' : '')">
+
+                    <!--bodka-->
+                    <span th:if="${!msg.read}"
+                          style="width: 7px; height: 7px; border-radius: 50%;
+                 display: inline-block; margin-right: 10px; flex-shrink: 0;"
+                          th:style="${msg.inviteType == 'LOBBY_RACE'} ? 'background:var(--neon-pink);width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:10px;flex-shrink:0;' :
+                    (${msg.inviteType == 'LOBBY_COOP'} ? 'background:var(--neon-blue);width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:10px;flex-shrink:0;' :
+                    'background:var(--neon-blue);width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:10px;flex-shrink:0;')"></span>
+                    <span th:unless="${!msg.read}"
+                          style="width: 7px; height: 7px; display: inline-block;
+                 margin-right: 10px; flex-shrink: 0;"></span>
+
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.75rem; color: var(--text-main);">
+                            <span th:if="${msg.inviteType == 'LOBBY_RACE'}" style="color: var(--neon-pink); margin-right: 4px;">⚔</span>
+                            <span th:if="${msg.inviteType == 'LOBBY_COOP'}" style="color: var(--neon-blue); margin-right: 4px;">🫂</span>
+                            <span th:if="${msg.inviteType == null or msg.inviteType == 'SPECTATE'}" style="color: var(--neon-blue); margin-right: 4px;">📡</span>
+
+                            <span th:if="${msg.inviteType == 'LOBBY_RACE'}" style="color: var(--neon-pink); font-family: 'Orbitron', monospace; font-size: 0.65rem;">RACE INVITE</span>
+                            <span th:if="${msg.inviteType == 'LOBBY_COOP'}" style="color: var(--neon-blue); font-family: 'Orbitron', monospace; font-size: 0.65rem;">CO-OP INVITE</span>
+                            <span th:if="${msg.inviteType == null or msg.inviteType == 'SPECTATE'}" style="color: var(--neon-blue); font-family: 'Orbitron', monospace; font-size: 0.65rem;">SPECTATE LINK</span>
+
+                            <span> · From: </span>
+                            <strong th:text="${msg.fromPlayer}" style="color: var(--neon-blue);">Player</strong>
+                        </div>
+                        <div class="text-dim" style="font-size: 0.6rem;"
+                             th:text="${#dates.format(msg.sentOn, 'd. M. yyyy HH:mm')}">date</div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a th:if="${msg.inviteType == null or msg.inviteType == 'SPECTATE'}"
+                           th:href="@{/spectate/{token}(token=${msg.token})}"
+                           class="btn btn-blue" style="font-size: 0.6rem; padding: 5px 10px;">
+                            Watch
+                        </a>
+                        <a th:if="${msg.inviteType == 'LOBBY_RACE' or msg.inviteType == 'LOBBY_COOP'}"
+                           th:href="@{/slitherlink/lobby/{token}/decline(token=${msg.token})}"
+                           class="btn btn-pink" style="font-size: 0.6rem; padding: 5px 10px;">
+                            ✘ Decline
+                        </a>
+                        <a th:if="${msg.inviteType == 'LOBBY_RACE'}"
+                           th:href="@{/slitherlink/lobby/{token}/accept(token=${msg.token})}"
+                           class="btn btn-pink" style="font-size: 0.6rem; padding: 5px 10px;">
+                            Join Race
+                        </a>
+                        <!-- COOP: Join lobby -->
+                        <a th:if="${msg.inviteType == 'LOBBY_COOP'}"
+                           th:href="@{/slitherlink/lobby/{token}/accept(token=${msg.token})}"
+                           class="btn btn-blue" style="font-size: 0.6rem; padding: 5px 10px;">
+                            Join Co-op
+                        </a>
+
+                        <a th:href="@{/slitherlink/deleteinvite(ident=${msg.ident}, box='inbox')}"
+                           style="color: var(--accent-pink); font-size: 0.75rem; text-decoration: none;
+                  opacity: 0.4; transition: opacity 0.2s;"
+                           onmouseenter="this.style.opacity='1'"
+                           onmouseleave="this.style.opacity='0.4'"
+                           title="Delete">✕</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OUTBOX -->
+            <div th:unless="${isInbox}">
+                <div class="section-title blue mb-8">Sent spectate links</div>
+
+                <div th:if="${#lists.isEmpty(messages)}" class="text-dim" style="font-size: 0.75rem;">
+                    No sent messages yet.
+                </div>
+
+                <div th:each="msg : ${messages}"
+                     style="display: flex; align-items: center; justify-content: space-between;
+                            padding: 10px 0; border-bottom: 1px solid var(--divider-color);">
+
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.75rem; color: var(--text-main);">
+                            <span th:if="${msg.inviteType == 'LOBBY_RACE'}" style="color: var(--neon-pink); margin-right: 4px;">⚔</span>
+                            <span th:if="${msg.inviteType == 'LOBBY_COOP'}" style="color: var(--neon-blue); margin-right: 4px;">🤝</span>
+                            <span th:if="${msg.inviteType == null or msg.inviteType == 'SPECTATE'}" style="color: var(--neon-blue); margin-right: 4px;">📡</span>
+                            To:
+                            <strong th:if="${msg.toPlayer != null}" th:text="${msg.toPlayer}"
+                                    style="color: var(--neon-blue);">Player</strong>
+                            <span th:unless="${msg.toPlayer != null}"
+                                  style="color: var(--text-dim); font-size: 0.65rem;">external link</span>
+                        </div>
+                        <div class="text-dim" style="font-size: 0.6rem;"
+                             th:text="${#dates.format(msg.sentOn, 'd. M. yyyy HH:mm')}">date</div>
+                        <div style="font-size: 0.55rem; margin-top: 2px;"
+                             th:if="${msg.toPlayer != null}">
+                            <span th:if="${msg.read}" style="color: var(--neon-green);">✔ seen</span>
+                            <span th:unless="${msg.read}" style="color: var(--text-dim);">○ not seen yet</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a th:if="${msg.inviteType == null or msg.inviteType == 'SPECTATE'}"
+                           th:href="@{/spectate/{token}(token=${msg.token})}"
+                           class="btn btn-yellow" style="font-size: 0.6rem; padding: 5px 10px;">Link</a>
+                        <a th:if="${msg.inviteType == 'LOBBY_RACE'}"
+                           th:href="@{/slitherlink/lobby/race/{token}(token=${msg.token})}"
+                           class="btn btn-pink" style="font-size: 0.6rem; padding: 5px 10px;">Lobby</a>
+                        <a th:if="${msg.inviteType == 'LOBBY_COOP'}"
+                           th:href="@{/slitherlink/lobby/coop/{token}(token=${msg.token})}"
+                           class="btn btn-blue" style="font-size: 0.6rem; padding: 5px 10px;">Lobby</a>
+                        <a th:href="@{/slitherlink/deleteinvite(ident=${msg.ident}, box='outbox')}"
+                           style="color: var(--accent-pink); font-size: 0.75rem; text-decoration: none;
+                                  opacity: 0.4; transition: opacity 0.2s;"
+                           onmouseenter="this.style.opacity='1'"
+                           onmouseleave="this.style.opacity='0.4'"
+                           title="Delete">✕</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="margin-top: 24px;">
+            <a href="/slitherlink/profile" class="btn btn-pink">← Back to profile</a>
+        </div>
+
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Play')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">SLITHERLINK</div>
+        <div class="game-info">
+            <span>👤 <strong th:text="${playerName}">Player</strong></span>
+            <span>Level: <strong th:text="${levelName}">2×2</strong></span>
+            <span>Moves: <strong id="movesEl" th:text="${moves}">0</strong>
+                <span th:if="${moveLimit > 0}" style="color: var(--text-dim);">
+                    / <span th:text="${moveLimit}">0</span>
+                </span>
+            </span>
+            <span id="timerSpan">⏱ Time: <strong id="timer" th:attr="data-elapsed=${elapsed}">0</strong>
+                <span th:if="${timeLimit > 0}" style="color: var(--text-dim);">
+                    / <span th:text="${timeLimit}">0</span>s
+                </span>
+            </span>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+            <a th:href="@{/slitherlink/new(level=${currentLevel}, fresh='true')}"
+               class="btn btn-pink">Retry new game</a>
+            <a href="/slitherlink/undo" class="btn btn-yellow">↩ undo</a>
+            <a href="/slitherlink/redo" class="btn btn-yellow">↪ redo</a>
+        </div>
+        <p class="text-dim" style="font-size: 0.6rem; margin-bottom: 20px;">
+            The game has autosave.
+        </p>
+
+        <!--pole-->
+        <div th:utext="${htmlField}"></div>
+
+        <!-- SPECTATE BUTTONS -->
+        <div style="margin-top: 16px; display: flex; gap: 8px; align-items: center;">
+            <button class="btn btn-blue" onclick="openModal('spectate-modal')"
+                    style="font-size: 0.65rem;">📡 Spectate link</button>
+            <a th:if="${hasActiveStream}"
+               href="/slitherlink/stopspectate" class="btn btn-pink"
+               style="font-size: 0.65rem;">🔴 Stop sharing</a>
+            <span th:if="${hasActiveStream}" id="my-watchers"
+                  style="color: var(--neon-pink); font-size: 0.7rem;">
+        <strong>0</strong> watching
+    </span>
+        </div>
+
+        <!-- SPECTATE MODAL -->
+        <div id="spectate-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000; justify-content:center; align-items:center;">
+            <div class="card" style="max-width: 450px; width: 90%; position: relative;">
+                <button onclick="closeModal('spectate-modal')"
+                        style="position:absolute; top:12px; right:12px; background:none; border:none;
+               color:var(--accent-pink); cursor:pointer; font-size:1rem;">✕</button>
+
+                <div class="section-title blue mb-8">Share spectate link</div>
+
+                <!-- HLASKY -->
+                <div th:if="${spectateMsg == 'sent'}"
+                     style="color: var(--neon-green); font-size: 0.65rem; margin-bottom: 10px;">
+                    ✔ Link sent successfully!
+                </div>
+                <div th:if="${spectateMsg == 'notfound'}"
+                     style="color: var(--accent-pink); font-size: 0.65rem; margin-bottom: 10px;">
+                    ⚠ Player not found!
+                </div>
+                <div th:if="${spectateMsg == 'self'}"
+                     style="color: var(--accent-pink); font-size: 0.65rem; margin-bottom: 10px;">
+                    ⚠ You cannot spectate yourself!
+                </div>
+
+                <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 12px;">
+                    Send to a registered player (delivers to their mailbox):
+                </p>
+                <form action="/slitherlink/invite" method="post"
+                      style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <div style="position: relative; flex: 1;">
+                        <input type="text" name="toPlayer" id="toPlayerInput" class="form-input"
+                               placeholder="Player name..." maxlength="10" autocomplete="off"
+                               onfocus="document.getElementById('follows-dropdown').style.display='block'"
+                               oninput="filterFollows()"
+                               style="width: 100%; font-size: 0.7rem;"/>
+                        <div id="follows-dropdown" style="display: none; position: absolute; top: 100%; left: 0;
+         right: 0; background: var(--bg-card2); border: 1px solid var(--neon-blue);
+         border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 10;">
+                            <div th:each="name : ${followingList}"
+                                 class="follow-option"
+                                 th:attr="data-name=${name}"
+                                 onclick="selectFollow(this.getAttribute('data-name'))"
+                                 style="padding: 6px 10px; cursor: pointer; font-size: 0.7rem;
+                    display: flex; align-items: center; gap: 6px;
+                    border-bottom: 1px solid var(--divider-color);">
+            <span class="online-dot" th:attr="data-online-user=${name}"
+                  style="width: 8px; height: 8px; border-radius: 50%; background: #555;"></span>
+                                <span th:text="${name}">player</span>
+                            </div>
+                            <div th:if="${#lists.isEmpty(followingList)}"
+                                 class="text-dim" style="padding: 6px 10px; font-size: 0.7rem;">
+                                No follows yet.
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-blue"
+                            style="font-size: 0.65rem;">Send →</button>
+                </form>
+                <hr style="border:none; border-top:1px solid var(--divider-color); margin-bottom: 16px;"/>
+
+                <div th:if="${spectateToken != null and spectateToken != ''}">
+                    <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 10px;">
+                        Or copy link to share anywhere:
+                    </p>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="spectate-link-input" class="form-input" readonly
+                               th:value="'/spectate/' + ${spectateToken}"
+                               style="flex: 1; font-size: 0.65rem; color: var(--neon-blue);"/>
+                        <button onclick="copySpectateLink()" class="btn btn-yellow"
+                                style="font-size: 0.65rem;">Copy</button>
+                    </div>
+                    <div id="copy-confirm" style="display:none; color: var(--neon-green);
+                 font-size: 0.65rem; margin-top: 8px;">✔ Copied!</div>
+                </div>
+
+                <div th:unless="${spectateToken != null and spectateToken != ''}">
+                    <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 10px;">
+                        Or generate a public link — anyone with the link can watch.<br>
+                        Non-registered users will be prompted to log in or sign up first.
+                    </p>
+                    <form action="/slitherlink/invite" method="post" style="text-align: center;">
+                        <button type="submit" class="btn btn-yellow"
+                                style="font-size: 0.65rem;">Generate link</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const serverElapsed = parseInt(document.getElementById('timer').getAttribute('data-elapsed'));
+    const timerEl = document.getElementById('timer');
+    const timeLimit = [[${timeLimit}]];
+    const timerSpan = document.getElementById('timerSpan');
+    const moveLimit = [[${moveLimit}]];
+    const movesEl = document.getElementById('movesEl');
+    const movesSpan = movesEl ? movesEl.closest('span') : null;
+    const spectateMsg = '[[${spectateMsg}]]';
+    const spectateToken = '[[${spectateToken}]]';
+
+    if (spectateMsg === 'sent' || spectateMsg === 'notfound' || spectateMsg === 'self'
+        || (spectateToken && spectateToken !== '')) {
+        openModal('spectate-modal');
+    }
+
+    let elapsed = 0;
+    let timerStarted = false;
+
+    function formatTime(sec) {
+        if (sec < 60) return sec + 's';
+        return Math.floor(sec / 60) + 'm ' + (sec % 60) + 's';
+    }
+
+    function updateTimerColor(remaining) {
+        if (!timerSpan) return;
+        timerSpan.style.color = '';
+        timerEl.style.animation = '';
+        if (remaining <= 3 && remaining > 0) {
+            timerSpan.style.color = '#ff00aa';
+            timerEl.style.animation = 'timerPulse 0.3s infinite';
+        } else if (remaining <= 10 && remaining > 3) {
+            timerSpan.style.color = '#ffee00';
+            timerEl.style.animation = 'timerPulse 0.8s infinite';
+        }
+    }
+
+    function updateMovesColor(currentMoves) {
+        if (!movesSpan || moveLimit <= 0) return;
+        const remaining = moveLimit - currentMoves;
+        movesSpan.style.color = '';
+        if (remaining <= 3 && remaining > 0) {
+            movesSpan.style.color = '#ff00aa';
+        } else if (remaining <= 10) {
+            movesSpan.style.color = '#ffee00';
+        }
+    }
+
+    function tick() {
+        elapsed++;
+        timerEl.textContent = formatTime(elapsed);
+
+        if (timeLimit > 0) {
+            const remaining = timeLimit - elapsed;
+            updateTimerColor(remaining);
+            if (remaining <= 0) {
+                timerEl.textContent = '0s';
+                window.location.href = '/slitherlink/checktime';
+            }
+        }
+    }
+
+    if (serverElapsed >= 0) {
+        elapsed = serverElapsed;
+        timerEl.textContent = formatTime(elapsed);
+        timerStarted = true;
+        if (timeLimit > 0) updateTimerColor(timeLimit - elapsed);
+        setInterval(tick, 1000);
+    } else {
+        timerEl.textContent = '0s';
+    }
+
+    updateMovesColor([[${moves}]]);
+
+    function startTimer() {
+        if (!timerStarted) {
+            timerStarted = true;
+            elapsed = 0;
+            setInterval(tick, 1000);
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.h-edge') || e.target.closest('.v-edge')) {
+            startTimer();
+        }
+    });
+
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+    function copySpectateLink() {
+        const input = document.getElementById('spectate-link-input');
+        navigator.clipboard.writeText(window.location.origin + input.value).then(() => {
+            const confirm = document.getElementById('copy-confirm');
+            confirm.style.display = 'block';
+            setTimeout(() => confirm.style.display = 'none', 2000);
+        });
+    }
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('spectate-modal');
+        if (modal && e.target === modal) modal.style.display = 'none';
+    });
+
+    function selectFollow(name) {
+        document.getElementById('toPlayerInput').value = name;
+        document.getElementById('follows-dropdown').style.display = 'none';
+    }
+
+    function filterFollows() {
+        const val = document.getElementById('toPlayerInput').value.toLowerCase();
+        document.querySelectorAll('.follow-option').forEach(opt => {
+            const name = (opt.getAttribute('data-name') || '').toLowerCase();
+            opt.style.display = name.indexOf(val) !== -1 ? 'flex' : 'none';
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#toPlayerInput') && !e.target.closest('#follows-dropdown')) {
+            const dd = document.getElementById('follows-dropdown');
+            if (dd) dd.style.display = 'none';
+        }
+    });
+
+    const myWatchersEl = document.getElementById('my-watchers');
+    if (myWatchersEl) {
+        async function updateMyWatchers() {
+            try {
+                const res = await fetch('/api/my-watchers');
+                const data = await res.json();
+                myWatchersEl.querySelector('strong').textContent = data.count || 0;
+            } catch (e) { }
+        }
+        updateMyWatchers();
+        setInterval(updateMyWatchers, 5000);
+    }
+</script>
+
+<style>
+    .follow-option:hover {
+        background: var(--bg-card);
+    }
+</style>
+
+</body>
+</html>

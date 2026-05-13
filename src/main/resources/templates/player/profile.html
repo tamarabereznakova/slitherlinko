@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Profile')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">PROFILE</div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title blue mb-8">⚡ <span th:text="${playerName}">Player</span></div>
+            <div class="text-dim" style="font-size: 0.7rem; margin-bottom: 16px;">
+                Member since: <span th:text="${#dates.format(createdOn, 'd. M. yyyy')}"
+                                    style="color: var(--accent-blue);">date</span>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--divider-color); margin: 8px 0 12px 0;"/>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                <a th:href="@{/slitherlink/new(level=${settings.preferredLevel})}" class="btn btn-blue"
+                   style="font-size: 0.65rem;">▶ PLAY NOW</a>
+                <a href="/slitherlink/inbox" class="btn btn-blue"
+                   style="font-size: 0.65rem; position: relative;">
+                    Mailbox
+                    <span th:if="${unreadCount > 0}"
+                          th:text="${unreadCount}"
+                          style="position:absolute; top:-6px; right:-6px; background:var(--neon-pink);
+                 color:#fff; border-radius:50%; font-size:0.5rem;
+                 width:14px; height:14px; display:flex; align-items:center;
+                 justify-content:center; font-family:'Orbitron',monospace;">0</span>
+                </a>
+                <a th:href="@{'/slitherlink/profile/' + ${playerName}}" class="btn btn-blue"
+                   style="font-size: 0.65rem;">
+                    SlitherFriends
+                </a>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--divider-color); margin: 8px 0 12px 0;"/>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title blue mb-8">Your paused games</div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <div th:each="levelNum : ${#numbers.sequence(0, 3)}"
+                     style="background: var(--bg-card2); border-radius: 8px;
+                            padding: 16px; min-width: 140px; text-align: center; flex: 1;">
+
+                    <div style="font-family: 'Audiowide', sans-serif; font-size: 0.9rem;
+                                color: var(--accent-blue); margin-bottom: 8px;">
+                        <span th:if="${levelNum == 0}">2×2</span>
+                        <span th:if="${levelNum == 1}">5×5</span>
+                        <span th:if="${levelNum == 2}">7×7</span>
+                        <span th:if="${levelNum == 3}">10×10</span>
+                    </div>
+
+                    <div th:if="${levelNum == 0 and saved0 != null}">
+                        <div class="text-dim" style="font-size: 0.6rem; margin-bottom: 2px;">
+                            <span th:text="${saved0.moves} + ' moves'">0 moves</span>
+                            · <span th:text="${saved0.elapsed} + 's'">0s</span>
+                        </div>
+                        <div class="text-dim" style="font-size: 0.55rem; margin-bottom: 6px;"
+                             th:text="${#dates.format(saved0.savedOn, 'd. M. yyyy HH:mm')}">date</div>
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <a href="/slitherlink/new?level=0" class="btn btn-blue"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="Resume">▶</a>
+                            <a href="/slitherlink/new?level=0&fresh=true" class="btn btn-pink"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="New game">↺</a>
+                        </div>
+                    </div>
+                    <div th:if="${levelNum == 0 and saved0 == null}" class="text-dim" style="font-size: 0.6rem;">none</div>
+
+                    <div th:if="${levelNum == 1 and saved1 != null}">
+                        <div class="text-dim" style="font-size: 0.6rem; margin-bottom: 2px;">
+                            <span th:text="${saved1.moves} + ' moves'">0 moves</span>
+                            · <span th:text="${saved1.elapsed} + 's'">0s</span>
+                        </div>
+                        <div class="text-dim" style="font-size: 0.55rem; margin-bottom: 6px;"
+                             th:text="${#dates.format(saved1.savedOn, 'd. M. yyyy HH:mm')}">date</div>
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <a href="/slitherlink/new?level=1" class="btn btn-blue"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="Resume">▶</a>
+                            <a href="/slitherlink/new?level=1&fresh=true" class="btn btn-pink"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="New game">↺</a>
+                        </div>
+                    </div>
+                    <div th:if="${levelNum == 1 and saved1 == null}" class="text-dim" style="font-size: 0.6rem;">none</div>
+
+                    <div th:if="${levelNum == 2 and saved2 != null}">
+                        <div class="text-dim" style="font-size: 0.6rem; margin-bottom: 2px;">
+                            <span th:text="${saved2.moves} + ' moves'">0 moves</span>
+                            · <span th:text="${saved2.elapsed} + 's'">0s</span>
+                        </div>
+                        <div class="text-dim" style="font-size: 0.55rem; margin-bottom: 6px;"
+                             th:text="${#dates.format(saved2.savedOn, 'd. M. yyyy HH:mm')}">date</div>
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <a href="/slitherlink/new?level=2" class="btn btn-blue"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="Resume">▶</a>
+                            <a href="/slitherlink/new?level=2&fresh=true" class="btn btn-pink"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="New game">↺</a>
+                        </div>
+                    </div>
+                    <div th:if="${levelNum == 2 and saved2 == null}" class="text-dim" style="font-size: 0.6rem;">none</div>
+
+                    <div th:if="${levelNum == 3 and saved3 != null}">
+                        <div class="text-dim" style="font-size: 0.6rem; margin-bottom: 2px;">
+                            <span th:text="${saved3.moves} + ' moves'">0 moves</span>
+                            · <span th:text="${saved3.elapsed} + 's'">0s</span>
+                        </div>
+                        <div class="text-dim" style="font-size: 0.55rem; margin-bottom: 6px;"
+                             th:text="${#dates.format(saved3.savedOn, 'd. M. yyyy HH:mm')}">date</div>
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <a href="/slitherlink/new?level=3" class="btn btn-blue"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="Resume">▶</a>
+                            <a href="/slitherlink/new?level=3&fresh=true" class="btn btn-pink"
+                               style="font-size: 0.55rem; padding: 5px 8px;" title="New game">↺</a>
+                        </div>
+                    </div>
+                    <div th:if="${levelNum == 3 and saved3 == null}" class="text-dim" style="font-size: 0.6rem;">none</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;"
+                 onclick="toggleSection('scores-section', this)">
+                <div class="section-title yellow" style="margin: 0;">Your scores</div>
+                <span style="color: var(--accent-yellow); font-size: 0.8rem;">▼</span>
+            </div>
+
+            <div id="scores-section" style="display:none; margin-top: 16px;">
+                <div class="level-tabs" style="margin-bottom: 16px;">
+                    <button class="level-tab active" id="ptab0" onclick="showProfileTab(0)">2×2</button>
+                    <button class="level-tab" id="ptab1" onclick="showProfileTab(1)">5×5</button>
+                    <button class="level-tab" id="ptab2" onclick="showProfileTab(2)">7×7</button>
+                    <button class="level-tab" id="ptab3" onclick="showProfileTab(3)">10×10</button>
+                </div>
+
+                <!--2x2-->
+                <ul class="score-list" id="pscores0">
+                    <li th:if="${#lists.isEmpty(myScores0)}" class="text-dim">none</li>
+                    <li class="score-item" th:each="s, i : ${myScores0}"
+                        th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="rank" th:text="${myScores0.size() - i.index} + '.'">1.</span>
+                        <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                        <span class="stats">
+                            <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                            <span class="stat-sep">·</span>
+                            <span class="stat-time" th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                        </span>
+                        <span th:if="${topIdents.contains(s.ident)}" style="color: var(--accent-yellow); font-size: 0.7rem; margin-left: 6px;" title="Top 10">🏆</span>
+                        <span th:unless="${topIdents.contains(s.ident)}" style="font-size: 0.7rem; margin-left: 6px; color: var(--text-dim);">—</span>
+                        <a th:href="@{/slitherlink/replay(ident=${s.ident})}" style="color: var(--accent-blue); font-size: 0.7rem; margin-left: 8px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Replay">▶</a>
+                        <a th:href="@{/slitherlink/deletescore(ident=${s.ident})}" style="color: var(--accent-pink); font-size: 0.7rem; margin-left: 4px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Remove">✕</a>
+                    </li>
+                </ul>
+
+                <!--5x5-->
+                <ul class="score-list" id="pscores1" style="display:none">
+                    <li th:if="${#lists.isEmpty(myScores1)}" class="text-dim">none</li>
+                    <li class="score-item" th:each="s, i : ${myScores1}"
+                        th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="rank" th:text="${myScores1.size() - i.index} + '.'">1.</span>
+                        <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                        <span class="stats">
+                            <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                            <span class="stat-sep">·</span>
+                            <span class="stat-time" th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                        </span>
+                        <span th:if="${topIdents.contains(s.ident)}" style="color: var(--accent-yellow); font-size: 0.7rem; margin-left: 6px;" title="Top 10">🏆</span>
+                        <span th:unless="${topIdents.contains(s.ident)}" style="font-size: 0.7rem; margin-left: 6px; color: var(--text-dim);">—</span>
+                        <a th:href="@{/slitherlink/replay(ident=${s.ident})}" style="color: var(--accent-blue); font-size: 0.7rem; margin-left: 8px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Replay">▶</a>
+                        <a th:href="@{/slitherlink/deletescore(ident=${s.ident})}" style="color: var(--accent-pink); font-size: 0.7rem; margin-left: 4px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Remove">✕</a>
+                    </li>
+                </ul>
+
+                <!--7x7-->
+                <ul class="score-list" id="pscores2" style="display:none">
+                    <li th:if="${#lists.isEmpty(myScores2)}" class="text-dim">none</li>
+                    <li class="score-item" th:each="s, i : ${myScores2}"
+                        th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="rank" th:text="${myScores2.size() - i.index} + '.'">1.</span>
+                        <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                        <span class="stats">
+                            <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                            <span class="stat-sep">·</span>
+                            <span class="stat-time" th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                        </span>
+                        <span th:if="${topIdents.contains(s.ident)}" style="color: var(--accent-yellow); font-size: 0.7rem; margin-left: 6px;" title="Top 10">🏆</span>
+                        <span th:unless="${topIdents.contains(s.ident)}" style="font-size: 0.7rem; margin-left: 6px; color: var(--text-dim);">—</span>
+                        <a th:href="@{/slitherlink/replay(ident=${s.ident})}" style="color: var(--accent-blue); font-size: 0.7rem; margin-left: 8px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Replay">▶</a>
+                        <a th:href="@{/slitherlink/deletescore(ident=${s.ident})}" style="color: var(--accent-pink); font-size: 0.7rem; margin-left: 4px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Remove">✕</a>
+                    </li>
+                </ul>
+
+                <!--10x10-->
+                <ul class="score-list" id="pscores3" style="display:none">
+                    <li th:if="${#lists.isEmpty(myScores3)}" class="text-dim">none</li>
+                    <li class="score-item" th:each="s, i : ${myScores3}"
+                        th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="rank" th:text="${i.index + 1} + '.'">1.</span>
+                        <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                        <span class="stats">
+                            <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                            <span class="stat-sep">·</span>
+                            <span class="stat-time" th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                        </span>
+                        <span th:if="${topIdents.contains(s.ident)}" style="color: var(--accent-yellow); font-size: 0.7rem; margin-left: 6px;" title="Top 10">🏆</span>
+                        <span th:unless="${topIdents.contains(s.ident)}" style="font-size: 0.7rem; margin-left: 6px; color: var(--text-dim);">—</span>
+                        <a th:href="@{/slitherlink/replay(ident=${s.ident})}" style="color: var(--accent-blue); font-size: 0.7rem; margin-left: 8px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Replay">▶</a>
+                        <a th:href="@{/slitherlink/deletescore(ident=${s.ident})}" style="color: var(--accent-pink); font-size: 0.7rem; margin-left: 4px; text-decoration: none; opacity: 0.4; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'" title="Remove">✕</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;"
+                 onclick="toggleSection('comments-section', this)">
+                <div class="section-title pink" style="margin: 0;">Your comments</div>
+                <span style="color: var(--accent-pink); font-size: 0.8rem;">▼</span>
+            </div>
+
+            <div id="comments-section" style="display:none; margin-top: 16px;">
+                <div class="profile-comments-scroll" style="max-height: 300px; overflow-y: auto; padding-right: 4px;">
+                    <div th:if="${#lists.isEmpty(myComments)}" class="text-dim">nothing here yet</div>
+                    <div class="comment-item" th:each="c : ${myComments}"
+                         th:title="${#dates.format(c.commentedOn, 'd. M. yyyy HH:mm')}"
+                         style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div class="comment-player" th:text="${c.player}">Player</div>
+                            <div class="comment-text" th:text="${c.text}">text</div>
+                        </div>
+                        <a th:href="@{/slitherlink/deletecomment(ident=${c.ident})}"
+                           style="color: var(--accent-pink); font-size: 0.7rem; margin-left: 8px;
+                                  text-decoration: none; opacity: 0.4; transition: opacity 0.2s; flex-shrink: 0;"
+                           onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'"
+                           title="Remove">✕</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <hr style="border: none; border-top: 1px solid var(--divider-color); margin: 8px 0 12px 0;"/>
+
+            <div style="max-width: 700px; margin-bottom: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-yellow" onclick="openModal('password-modal')"
+                        style="font-size: 0.65rem;">Change password</button>
+                <button class="btn btn-blue" onclick="openModal('settings-modal')"
+                        style="font-size: 0.65rem;">⚙ Settings</button>
+            </div>
+
+        <hr class="divider" style="max-width: 700px;"/>
+        <div style="max-width: 700px; margin-bottom: 32px;">
+            <div class="section-title pink mb-8">⚠ DANGEROUS ZONE</div>
+            <p class="text-dim" style="font-size: 0.7rem; margin-bottom: 16px;">
+                By deleting your profile, you will lose all your data — scores, comments, ongoing games. This action is irreversible!
+            </p>
+            <button class="btn btn-pink" onclick="confirmDelete()">Delete profile</button>
+        </div>
+
+            <!-- =====PASSWORD modal===== -->
+            <div id="password-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+     z-index:1000; justify-content:center; align-items:center;">
+                <div class="card" style="max-width: 450px; width: 90%; position: relative;">
+                    <button onclick="closeModal('password-modal')"
+                            style="position:absolute; top:12px; right:12px; background:none; border:none;
+                       color:var(--accent-pink); cursor:pointer; font-size:1rem;">✕</button>
+                    <div class="section-title pink mb-8">Change password</div>
+
+                    <div th:if="${error == 'wrongpassword'}" class="error-msg" style="margin-bottom: 12px;">
+                        ⚠ Old password is wrong!
+                    </div>
+                    <div th:if="${error == 'invalidpassword'}" class="error-msg" style="margin-bottom: 12px;">
+                        ⚠ New password has to be 4 - 10 characters long!
+                    </div>
+                    <div th:if="${error == 'samepassword'}" class="error-msg" style="margin-bottom: 12px;">
+                        ⚠ New password must be different from your old password!
+                    </div>
+                    <div th:if="${success == 'passwordchanged'}"
+                         style="color: var(--accent-green); font-size: 0.65rem; margin-bottom: 12px;">
+                        ✔ Password was successfully changed!
+                    </div>
+
+                    <form action="/slitherlink/changepassword" method="post">
+                        <div class="form-group">
+                            <label class="form-label">OLD password</label>
+                            <div style="position: relative;">
+                                <input type="password" name="oldPassword" id="oldPassword" class="form-input"
+                                       placeholder="Type in your old password"
+                                       required maxlength="10" style="padding-right: 40px;"/>
+                                <span onclick="togglePassword('oldPassword', this)"
+                                      style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+                                 cursor: pointer; font-size: 0.9rem; color: var(--text-dim);
+                                 user-select: none; line-height: 1;">👁</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New password</label>
+                            <div style="position: relative;">
+                                <input type="password" name="newPassword" id="newPassword" class="form-input"
+                                       placeholder="Type in your new password"
+                                       required minlength="4" maxlength="10" style="padding-right: 40px;"/>
+                                <span onclick="togglePassword('newPassword', this)"
+                                      style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+                                 cursor: pointer; font-size: 0.9rem; color: var(--text-dim);
+                                 user-select: none; line-height: 1;">👁</span>
+                            </div>
+                            <small class="text-dim" style="font-size: 0.6rem; margin-top: 4px; display: block;">
+                                4 - 10 characters long
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-blue">Save changes</button>
+                    </form>
+                </div>
+            </div>
+
+        <!-- =====SETTINGS modal===== -->
+        <div id="settings-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+             z-index:1000; justify-content:center; align-items:center; overflow-y:auto;">
+            <div class="card" style="max-width: 500px; width: 90%; position: relative; margin: 20px auto;">
+                <button onclick="closeModal('settings-modal')"
+                        style="position:absolute; top:12px; right:12px; background:none; border:none;
+                               color:var(--accent-pink); cursor:pointer; font-size:1rem;">✕</button>
+                <div class="section-title blue mb-8">⚙ Advanced settings</div>
+
+                <div th:if="${success == 'settingssaved'}"
+                     style="color: var(--accent-green); font-size: 0.65rem; margin-bottom: 12px;">
+                    ✔ Settings saved!
+                </div>
+
+                <form action="/slitherlink/settings" method="post">
+                    <div class="form-group">
+                        <label class="form-label">Preferred theme</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="preferredTheme" value="neon"
+                                       th:checked="${settings.preferredTheme == 'neon' or settings.preferredTheme == null}"/>
+                                🌙 Neon
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="preferredTheme" value="pastel"
+                                       th:checked="${settings.preferredTheme == 'pastel'}"/>
+                                🌸 Pastel
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preferred level</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="preferredLevel" value="0"
+                                       th:checked="${settings.preferredLevel == 0}"/> 2×2
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="preferredLevel" value="1"
+                                       th:checked="${settings.preferredLevel == 1}"/> 5×5
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="preferredLevel" value="2"
+                                       th:checked="${settings.preferredLevel == 2}"/> 7×7
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="preferredLevel" value="3"
+                                       th:checked="${settings.preferredLevel == 3}"/> 10×10
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Move limit (0 = no limit)</label>
+                        <input type="number" name="moveLimit" class="form-input"
+                               th:value="${settings.moveLimit}" min="0" max="500" placeholder="0"/>
+                        <small class="text-dim" style="font-size: 0.6rem; margin-top: 4px; display: block;">
+                            Max 500 moves. 0 = unlimited.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time limit in seconds (0 = no limit)</label>
+                        <input type="number" name="timeLimit" class="form-input"
+                               th:value="${settings.timeLimit}" min="0" max="86400" placeholder="0"/>
+                        <small class="text-dim" style="font-size: 0.6rem; margin-top: 4px; display: block;">
+                            Max 86400s (24 hours). 0 = unlimited.
+                        </small>
+                    </div>
+                    <div class="setting-row" style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+                        <input type="checkbox" id="showMultiplayerScores" name="showMultiplayerScores"
+                               th:checked="${settings.showMultiplayerScores}" value="true"/>
+                        <label for="showMultiplayerScores" style="font-size: 0.7rem;">
+                            Show my multiplayer games on my SlitherFriends profile
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-blue">Save settings</button>
+                </form>
+            </div>
+        </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleSection(id, headerEl) {
+        const section = document.getElementById(id);
+        const arrow = headerEl.querySelector('span:last-child');
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            if (arrow) arrow.textContent = '▲';
+        } else {
+            section.style.display = 'none';
+            if (arrow) arrow.textContent = '▼';
+        }
+    }
+
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    document.addEventListener('click', function(e) {
+        ['settings-modal', 'password-modal'].forEach(function(id) {
+            const modal = document.getElementById(id);
+            if (modal && e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    function showProfileTab(level) {
+        ['pscores0','pscores1','pscores2','pscores3'].forEach(function(id) {
+            document.getElementById(id).style.display = 'none';
+        });
+        ['ptab0','ptab1','ptab2','ptab3'].forEach(function(id) {
+            document.getElementById(id).classList.remove('active');
+        });
+        document.getElementById('pscores' + level).style.display = 'block';
+        document.getElementById('ptab' + level).classList.add('active');
+    }
+
+    function togglePassword(fieldId, icon) {
+        const input = document.getElementById(fieldId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.style.color = 'var(--accent-blue)';
+        } else {
+            input.type = 'password';
+            icon.style.color = 'var(--text-dim)';
+        }
+    }
+
+    function confirmDelete() {
+        if (confirm('Are you sure, you want to proceed? This action is irreversible!')) {
+            window.location.href = '/slitherlink/deleteprofile';
+        }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'settingssaved') {
+        openModal('settings-modal');
+    }
+    if (urlParams.get('error') && ['wrongpassword','invalidpassword','samepassword'].includes(urlParams.get('error'))) {
+        openModal('password-modal');
+    }
+    if (urlParams.get('success') === 'passwordchanged') {
+        openModal('password-modal');
+    }
+</script>
+
+</body>
+</html>

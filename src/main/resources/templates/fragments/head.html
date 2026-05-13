@@ -1,0 +1,38 @@
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title}">Slitherlink</title>
+
+    <script>
+        const serverTheme = '[[${preferredTheme != null ? preferredTheme : ""}]]';
+        if (serverTheme) {
+            localStorage.setItem('theme', serverTheme);
+        }
+        const savedTheme = localStorage.getItem('theme') || 'neon';
+        const cssHref = savedTheme === 'pastel' ? '/css/style-pastel.css' : '/css/style.css';
+        document.write('<link id="theme-css" rel="stylesheet" href="' + cssHref + '"/>');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const favicon = document.querySelector('link[rel="icon"]');
+            if (favicon) {
+                favicon.href = savedTheme === 'pastel' ? '/images/snake2.ico' : '/images/snake.ico';
+            }
+
+            if (localStorage.getItem('theme') === 'pastel') {
+                const unit = '· ˚ ✦ ˚ ·';
+                document.querySelectorAll('.page-title').forEach(el => {
+                    const titleWidth = el.getBoundingClientRect().width;
+                    const charWidth = 10;
+                    const units = Math.max(1, Math.round(titleWidth / (unit.length * charWidth)));
+                    const ornament = Array(units).fill(unit).join(' ❀ ');
+                    el.style.setProperty('--ornament', '"' + ornament + '"');
+                });
+            }
+        });
+    </script>
+
+    <link rel="icon" type="image/x-icon" th:href="@{/images/snake.ico}"/>
+    <script src="/js/slitherlink_ads.js"></script>
+    <script src="/js/notifications.js"></script>
+
+</head>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Spectate')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">SPECTATE</div>
+
+        <!--ERROR-->
+        <div th:if="${error == 'expired'}" class="card" style="max-width: 600px;">
+            <div class="section-title pink mb-8">⚠ Game not found</div>
+            <p class="text-dim" style="margin-bottom: 20px;">
+                This spectate link has expired or the game has already ended.
+            </p>
+            <a href="/slitherlink/level" class="btn btn-blue">← Back</a>
+        </div>
+
+        <!--VIEV-->
+        <div th:unless="${error == 'expired'}">
+            <div class="game-info" style="margin-bottom: 20px;">
+                <span>👤 Watching: <strong th:text="${spectatedPlayer}">Player</strong></span>
+                <span>Level: <strong th:text="${levelName}">5×5</strong></span>
+                <span>Moves: <strong id="spec-moves">—</strong></span>
+                <span>⏱ Time: <strong id="spec-timer">—</strong></span>
+                <span style="color: var(--neon-pink); font-size: 0.7rem;">
+                    <strong id="spec-watchers">1</strong> watching
+                </span>
+                <span id="spec-status-badge"
+                      style="font-size: 0.65rem; color: var(--accent-yellow);">● connecting...</span>
+            </div>
+
+            <!--pole-->
+            <div id="spec-field">
+                <p class="text-dim" style="font-size: 0.75rem;">Waiting for player to make first move...</p>
+            </div>
+
+            <div style="margin-top: 24px;">
+                <a href="/spectate/leave" class="btn btn-pink">← Leave</a>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script th:if="${error != 'expired'}">
+    const SPECTATE_TOKEN = '[[${token}]]';
+    const movesEl  = document.getElementById('spec-moves');
+    const timerEl  = document.getElementById('spec-timer');
+    const fieldEl  = document.getElementById('spec-field');
+    const statusEl = document.getElementById('spec-status-badge');
+
+    function formatTime(sec) {
+        if (sec < 60) return sec + 's';
+        return Math.floor(sec / 60) + 'm ' + (sec % 60) + 's';
+    }
+
+    async function fetchState() {
+        try {
+            const res = await fetch('/api/spectate/' + SPECTATE_TOKEN);
+            const data = await res.json();
+
+            if (data.status === 'ended') {
+                statusEl.style.color = 'var(--accent-pink)';
+                statusEl.textContent = '● game ended';
+                fieldEl.innerHTML = '<p class="text-dim" style="font-size:0.75rem;">The game has ended.</p>';
+                movesEl.textContent = '—';
+                timerEl.textContent = '—';
+                clearInterval(pollInterval);
+                return;
+            }
+
+            if (data.status === 'waiting') {
+                statusEl.style.color = 'var(--accent-yellow)';
+                statusEl.textContent = '● waiting for first move...';
+                return;
+            }
+
+            // status === 'playing'
+            statusEl.style.color = 'var(--neon-green)';
+            statusEl.textContent = '● live';
+            movesEl.textContent = data.moves;
+            const wcEl = document.getElementById('spec-watchers');
+            if (wcEl && typeof data.watcherCount === 'number') {
+                wcEl.textContent = data.watcherCount;
+            }
+            timerEl.textContent = formatTime(data.elapsed);
+            if (data.htmlField) fieldEl.innerHTML = data.htmlField;
+
+        } catch (e) {
+            statusEl.style.color = 'var(--accent-pink)';
+            statusEl.textContent = '● connection error';
+        }
+    }
+
+    fetchState();
+    const pollInterval = setInterval(fetchState, 3000);//3 sek
+</script>
+
+</body>
+</html>

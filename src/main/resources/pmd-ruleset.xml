@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="MyRules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+             https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>Clean code rules: imports, complexity, length, variables</description>
+
+    <rule ref="category/java/codestyle.xml/UnnecessaryImport"/>
+
+    <rule ref="category/java/design.xml/CyclomaticComplexity"/>
+    <rule ref="category/java/design.xml/NPathComplexity"/>
+    <rule ref="category/java/design.xml/CognitiveComplexity"/>
+
+    <rule ref="category/java/design.xml/NcssCount">
+        <properties>
+            <property name="classReportLevel" value="300"/>
+            <property name="methodReportLevel" value="60"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/ExcessiveParameterList"/>
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="11"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/TooManyFields"/>
+
+    <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
+    <rule ref="category/java/bestpractices.xml/UnusedFormalParameter"/>
+    <rule ref="category/java/bestpractices.xml/UnusedAssignment"/>
+    <rule ref="category/java/codestyle.xml/UnnecessaryLocalBeforeReturn"/>
+    <rule ref="category/java/codestyle.xml/LocalVariableCouldBeFinal"/>
+
+</ruleset>

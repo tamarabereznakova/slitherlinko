@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Profile')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">
+            <span th:text="${profileUser}">player</span>'s PROFILE
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title blue mb-8">
+                ⚡ <span th:text="${profileUser}">player</span>
+                <span class="online-dot" th:attr="data-online-user=${profileUser}"
+                      style="display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+                 background: #555; margin-left: 8px; vertical-align: middle;
+                 transition: background 0.3s ease;"></span>
+                <span th:if="${isOwnProfile}" class="text-dim"
+                      style="font-size: 0.55rem; margin-left: 8px;">(this is you)</span>
+            </div>
+
+            <div class="text-dim" style="font-size: 0.7rem; margin-bottom: 8px;">
+                Member since:
+                <span th:text="${#dates.format(createdOn, 'd. M. yyyy')}"
+                      style="color: var(--accent-blue);">date</span>
+            </div>
+
+            <div style="display: flex; gap: 16px; font-size: 0.7rem; margin-bottom: 16px;">
+                <span>⭐ <strong th:text="${followersCount}">0</strong> followers</span>
+                <span>⭐ <strong th:text="${followingCount}">0</strong> following</span>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--divider-color); margin: 8px 0 12px 0;"/>
+
+            <div th:if="${isOwnProfile}">
+                <button class="btn btn-yellow"
+                        style="font-size: 0.65rem; opacity: 0.4; cursor: not-allowed;" disabled>
+                    Your profile
+                </button>
+            </div>
+            <div th:unless="${isOwnProfile}">
+                <a th:if="${!isFollowing}"
+                   th:href="@{/slitherlink/follow(user=${profileUser}, from=${'/slitherlink/profile/' + profileUser})}"
+                   class="btn btn-blue" style="font-size: 0.65rem;">
+                    Follow
+                </a>
+                <a th:if="${isFollowing}"
+                   th:href="@{/slitherlink/unfollow(user=${profileUser}, from=${'/slitherlink/profile/' + profileUser})}"
+                   class="btn btn-pink" style="font-size: 0.65rem;">
+                    ✘ Unfollow
+                </a>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title yellow mb-8">TOP 10 scores</div>
+
+            <div class="level-tabs" style="margin-bottom: 16px;">
+                <button class="level-tab active" id="ftab0" onclick="showFriendTab(0)">2×2</button>
+                <button class="level-tab" id="ftab1" onclick="showFriendTab(1)">5×5</button>
+                <button class="level-tab" id="ftab2" onclick="showFriendTab(2)">7×7</button>
+                <button class="level-tab" id="ftab3" onclick="showFriendTab(3)">10×10</button>
+            </div>
+
+            <ul class="score-list" id="fscores0">
+                <li th:if="${#lists.isEmpty(userTopScores0)}" class="text-dim">
+                    No top 10 results on this level.
+                </li>
+                <li class="score-item" th:each="s : ${userTopScores0}"
+                    th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}">
+                    <span class="rank">🏆</span>
+                    <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                    <span class="stats">
+                        <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                        <span class="stat-sep">·</span>
+                        <span class="stat-time"
+                              th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                    </span>
+                    <a th:href="@{/slitherlink/replay(ident=${s.ident}, step=0, from='/slitherlink/profile/' + ${profileUser})}" class="btn btn-yellow" style="font-size: 0.55rem; padding: 3px 8px; margin-left: 8px;">▶ Replay</a>
+                </li>
+            </ul>
+
+            <ul class="score-list" id="fscores1" style="display:none">
+                <li th:if="${#lists.isEmpty(userTopScores1)}" class="text-dim">
+                    No top 10 results on this level.
+                </li>
+                <li class="score-item" th:each="s : ${userTopScores1}"
+                    th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}">
+                    <span class="rank">🏆</span>
+                    <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                    <span class="stats">
+                        <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                        <span class="stat-sep">·</span>
+                        <span class="stat-time"
+                              th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                    </span>
+                    <a th:href="@{/slitherlink/replay(ident=${s.ident}, step=0, from='/slitherlink/profile/' + ${profileUser})}" class="btn btn-yellow" style="font-size: 0.55rem; padding: 3px 8px; margin-left: 8px;">▶ Replay</a>
+                </li>
+            </ul>
+
+            <ul class="score-list" id="fscores2" style="display:none">
+                <li th:if="${#lists.isEmpty(userTopScores2)}" class="text-dim">
+                    No top 10 results on this level.
+                </li>
+                <li class="score-item" th:each="s : ${userTopScores2}"
+                    th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}">
+                    <span class="rank">🏆</span>
+                    <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                    <span class="stats">
+                        <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                        <span class="stat-sep">·</span>
+                        <span class="stat-time"
+                              th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                    </span>
+                    <a th:href="@{/slitherlink/replay(ident=${s.ident}, step=0, from='/slitherlink/profile/' + ${profileUser})}" class="btn btn-yellow" style="font-size: 0.55rem; padding: 3px 8px; margin-left: 8px;">▶ Replay</a>
+                </li>
+            </ul>
+
+            <ul class="score-list" id="fscores3" style="display:none">
+                <li th:if="${#lists.isEmpty(userTopScores3)}" class="text-dim">
+                    No top 10 results on this level.
+                </li>
+                <li class="score-item" th:each="s : ${userTopScores3}"
+                    th:title="${#dates.format(s.playedOn, 'd. M. yyyy HH:mm')}">
+                    <span class="rank">🏆</span>
+                    <span class="name" th:text="${#dates.format(s.playedOn, 'd. M. yyyy')}">date</span>
+                    <span class="stats">
+                        <span class="stat-moves" th:text="${s.moves} + ' moves'">0 moves</span>
+                        <span class="stat-sep">·</span>
+                        <span class="stat-time"
+                              th:text="${s.duration >= 60} ? (${s.duration / 60} + 'm ' + ${s.duration % 60} + 's') : (${s.duration} + 's')">0s</span>
+                    </span>
+                    <a th:href="@{/slitherlink/replay(ident=${s.ident}, step=0, from='/slitherlink/profile/' + ${profileUser})}" class="btn btn-yellow" style="font-size: 0.55rem; padding: 3px 8px; margin-left: 8px;">▶ Replay</a>
+                </li>
+            </ul>
+        </div>
+
+        <div th:if="${showMultiplayer}" class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title pink mb-8">🎮 MULTIPLAYER</div>
+
+            <div th:if="${#lists.isEmpty(multiplayerScores)}" class="text-dim"
+                 style="font-size: 0.7rem;">
+                No multiplayer games played yet.
+            </div>
+
+            <div th:each="m : ${multiplayerScores}"
+                 style="padding: 8px 0; border-bottom: 1px solid var(--divider-color);
+                        font-size: 0.7rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span th:if="${m.mode == 'COOP'}" style="color: var(--neon-blue);">CO-OP</span>
+                        <span th:if="${m.mode == 'RACE'}" style="color: var(--neon-pink);">RACE</span>
+                        <span class="text-dim" style="font-size: 0.6rem;">·</span>
+                        <span th:text="${m.level == 0 ? '2×2' : (m.level == 1 ? '5×5' : (m.level == 2 ? '7×7' : '10×10'))}">5×5</span>
+                        <span th:if="${m.winner != null}" style="color: var(--neon-green);">
+                            · 🏆 <span th:text="${m.winner}">winner</span>
+                        </span>
+                    </div>
+                    <div class="text-dim" style="font-size: 0.55rem;"
+                         th:text="${#dates.format(m.playedOn, 'd. M. yyyy HH:mm')}">date</div>
+                </div>
+                <div class="text-dim" style="font-size: 0.6rem; margin-top: 2px;">
+                    <span th:text="${m.players}">players</span>
+                    <span> · </span>
+                    <span th:text="${m.moves} + ' moves'">0 moves</span>
+                    <span> · </span>
+                    <span th:text="${m.duration >= 60} ? (${m.duration / 60} + 'm ' + ${m.duration % 60} + 's') : (${m.duration} + 's')">0s</span>
+                </div>
+            </div>
+        </div>
+
+        <div th:unless="${showMultiplayer}" class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title pink mb-8">🎮 MULTIPLAYER</div>
+            <p class="text-dim" style="font-size: 0.7rem;">
+                This player chose to keep their multiplayer games private.
+            </p>
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title pink mb-8">Wall</div>
+            <div style="max-height: 400px; overflow-y: auto; padding-right: 4px; margin-bottom: 16px;">
+                <div th:if="${#lists.isEmpty(profileComments)}" class="text-dim"
+                     style="font-size: 0.75rem;">
+                    No messages on the wall yet. Be the first one!
+                </div>
+                <div class="comment-item" th:each="c : ${profileComments}"
+                     th:title="${#dates.format(c.commentedOn, 'd. M. yyyy HH:mm')}"
+                     style="display: flex; justify-content: space-between; align-items: flex-start;
+                            padding: 8px 0; border-bottom: 1px solid var(--divider-color);">
+                    <div style="flex: 1;">
+                        <div class="comment-player">
+                            <a th:href="@{'/slitherlink/profile/' + ${c.player}}"
+                               style="color: var(--neon-blue); text-decoration: none;"
+                               th:text="${c.player}">Player</a>
+                        </div>
+                        <div class="comment-text" th:text="${c.text}">text</div>
+                    </div>
+                    <a th:if="${c.player == playerName}"
+                       th:href="@{'/slitherlink/profile/' + ${profileUser} + '/deletecomment'(ident=${c.ident})}"
+                       style="color: var(--accent-pink); font-size: 0.7rem; margin-left: 8px;
+                              text-decoration: none; opacity: 0.4; transition: opacity 0.2s; flex-shrink: 0;"
+                       onmouseenter="this.style.opacity='1'"
+                       onmouseleave="this.style.opacity='0.4'"
+                       title="Remove">✕</a>
+                </div>
+            </div>
+
+            <form th:action="@{'/slitherlink/profile/' + ${profileUser} + '/comment'}" method="post"
+                  class="comment-form">
+                <textarea name="text"
+                          th:placeholder="|Write something on ${profileUser}'s wall...|"
+                          maxlength="100"
+                          oninput="
+                              const n = this.value.length;
+                              const c = this.nextElementSibling;
+                              c.textContent = n + '/100';
+                              c.className = 'comment-char-counter' + (n >= 100 ? ' danger' : n >= 80 ? ' warning' : '');
+                          "></textarea>
+                <div class="comment-char-counter">0/100</div>
+                <button type="submit" class="btn btn-pink">Post</button>
+            </form>
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title yellow mb-8">
+                ACHIEVEMENTS
+                <span class="text-dim" style="font-size: 0.7rem; margin-left: 8px;">
+            <span th:text="${achievementsUnlocked}">0</span>
+            / <span th:text="${achievementsTotal}">0</span>
+        </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
+                <div th:each="a : ${achievements}"
+                     th:title="${a.description}"
+                     th:style="${a.unlocked} ? 'opacity:1' : 'opacity:0.25; filter:grayscale(1)'"
+                     style="padding: 10px; text-align: center; border: 1px solid var(--divider-color);
+                    border-radius: 6px; background: var(--bg-card2); transition: all 0.3s;">
+                    <div style="font-size: 1.5rem; margin-bottom: 4px;" th:text="${a.emoji}">🏆</div>
+                    <div style="font-size: 0.65rem; font-weight: bold;" th:text="${a.name}">Name</div>
+                    <div class="text-dim" style="font-size: 0.55rem; margin-top: 4px;" th:text="${a.description}">desc</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 24px;">
+            <a href="/slitherlink/friends" class="btn btn-pink">← Back to SlitherFriends</a>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    function showFriendTab(level) {
+        ['fscores0','fscores1','fscores2','fscores3'].forEach(function(id) {
+            document.getElementById(id).style.display = 'none';
+        });
+        ['ftab0','ftab1','ftab2','ftab3'].forEach(function(id) {
+            document.getElementById(id).classList.remove('active');
+        });
+        document.getElementById('fscores' + level).style.display = 'block';
+        document.getElementById('ftab' + level).classList.add('active');
+    }
+</script>
+</body>
+</html>

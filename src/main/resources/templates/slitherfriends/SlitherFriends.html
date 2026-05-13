@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - SlitherFriends')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">SLITHERFRIENDS</div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title blue mb-8">Find a player</div>
+
+            <form action="/slitherlink/friends" method="get"
+                  style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <input type="text" name="search" class="form-input"
+                       placeholder="Player name..."
+                       maxlength="10" autocomplete="off"
+                       th:value="${search}"
+                       style="flex: 1; font-size: 0.7rem;"/>
+                <button type="submit" class="btn btn-blue"
+                        style="font-size: 0.65rem;">Search →</button>
+            </form>
+
+            <div th:if="${searchResult != null}">
+                <div th:if="${searchFound}"
+                     style="padding: 10px; background: var(--bg-card2); border-radius: 6px;
+                            display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem;">
+                        ⚡ <a th:href="@{'/slitherlink/profile/' + ${searchResult}}"
+                             style="color: var(--neon-blue); text-decoration: none;"
+                             th:text="${searchResult}">player</a>
+                    </span>
+                    <a th:href="@{'/slitherlink/profile/' + ${searchResult}}"
+                       class="btn btn-yellow" style="font-size: 0.6rem; padding: 4px 10px;">View →</a>
+                </div>
+                <div th:unless="${searchFound}"
+                     class="error-msg" style="font-size: 0.7rem;">
+                    ⚠ Player <strong th:text="${searchResult}">x</strong> does not exist!
+                </div>
+            </div>
+            <div th:if="${param.error != null and param.error[0] == 'notfound'}"
+                 class="error-msg" style="font-size: 0.7rem; margin-top: 10px;">
+                ⚠ That player does not exist.
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title yellow mb-8">
+                Following
+                <span class="text-dim" style="font-size: 0.6rem; margin-left: 8px;"
+                      th:text="'(' + ${#lists.size(following)} + ')'">(0)</span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(following)}" class="text-dim" style="font-size: 0.7rem;">
+                You are not following anyone yet.
+            </div>
+
+            <div th:each="f : ${following}"
+                 style="display: flex; justify-content: space-between; align-items: center;
+                        padding: 8px 0; border-bottom: 1px solid var(--divider-color);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+    <span class="online-dot" th:attr="data-online-user=${f.followingName}"
+          style="display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+                 background: #555; transition: background 0.3s ease;"></span>
+                    <a th:href="@{'/slitherlink/profile/' + ${f.followingName}}"
+                       class="follow-name"
+                       th:text="${f.followingName}"
+                       style="font-size: 0.8rem; color: var(--neon-blue); text-decoration: none;">player</a>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <span class="text-dim" style="font-size: 0.55rem;"
+                          th:text="${#dates.format(f.followedOn, 'd. M. yyyy')}">date</span>
+                    <a th:href="@{/slitherlink/unfollow(user=${f.followingName}, from='/slitherlink/friends')}"
+                       style="color: var(--accent-pink); font-size: 0.7rem; text-decoration: none;
+                              opacity: 0.4; transition: opacity 0.2s;"
+                       onmouseenter="this.style.opacity='1'"
+                       onmouseleave="this.style.opacity='0.4'"
+                       title="Unfollow">✕</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 700px; margin-bottom: 24px;">
+            <div class="section-title pink mb-8">
+                Followers
+                <span class="text-dim" style="font-size: 0.6rem; margin-left: 8px;"
+                      th:text="'(' + ${#lists.size(followers)} + ')'">(0)</span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(followers)}" class="text-dim" style="font-size: 0.7rem;">
+                No followers yet.
+            </div>
+
+            <div th:each="f : ${followers}"
+                 style="display: flex; justify-content: space-between; align-items: center;
+                        padding: 8px 0; border-bottom: 1px solid var(--divider-color);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+    <span class="online-dot" th:attr="data-online-user=${f.followerName}"
+          style="display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+                 background: #555; transition: background 0.3s ease;"></span>
+                    <a th:href="@{'/slitherlink/profile/' + ${f.followerName}}"
+                       class="follow-name"
+                       th:text="${f.followerName}"
+                       style="font-size: 0.8rem; color: var(--neon-blue); text-decoration: none;">player</a>
+                </div>
+                <span class="text-dim" style="font-size: 0.55rem;"
+                      th:text="${#dates.format(f.followedOn, 'd. M. yyyy')}">date</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 24px;">
+            <a href="/slitherlink/profile" class="btn btn-pink">← Back to profile</a>
+        </div>
+
+    </main>
+</div>
+
+<style>
+    .follow-name {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    .follow-name:hover {
+        text-shadow: 0 0 8px var(--neon-blue), 0 0 16px var(--neon-blue);
+        animation: followPulse 0.8s ease-in-out infinite;
+    }
+    @keyframes followPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+</style>
+</body>
+</html>

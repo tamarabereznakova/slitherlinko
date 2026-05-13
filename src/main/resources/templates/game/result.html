@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Result')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">RESULT</div>
+
+        <!---->
+        <div th:if="${inTop10}" class="top10-badge">
+            YOU MADE IT TO TOP 10 PLAYERS !!!
+        </div>
+
+        <div class="result-stats">
+            <div class="stat-box">
+                <span class="stat-value" th:text="${playerName}">Player</span>
+                <span class="stat-label">Player</span>
+            </div>
+
+            <div class="stat-box">
+                <span class="stat-value" th:text="${levelName}">5×5</span>
+                <span class="stat-label">Level</span>
+            </div>
+
+            <div class="stat-box">
+                <span class="stat-value" th:text="${lastMoves}">0</span>
+                <span class="stat-label">Moves</span>
+            </div>
+
+            <div class="stat-box">
+                <span class="stat-value" th:text="${lastDuration >= 60} ? (${lastDuration / 60} + 'm ' + ${lastDuration % 60} + 's') : (${lastDuration} + 's')">0s</span>
+                <span class="stat-label">Time</span>
+            </div>
+
+        </div>
+
+        <!---->
+        <p class="text-dim" style="margin-bottom: 20px;">
+            Do you want to save this score ?
+        </p>
+
+        <div style="display: flex; gap: 16px;">
+            <a href="/slitherlink/result?save=yes" class="btn btn-blue">
+                ✔ SAVE
+            </a>
+            <a href="/slitherlink/result?save=no" class="btn btn-pink">
+                ✘ DELETE
+            </a>
+        </div>
+
+    </main>
+</div>
+</body>
+</html>

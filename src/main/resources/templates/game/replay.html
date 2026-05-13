@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Replay')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">REPLAY</div>
+
+        <!---->
+        <div class="game-info" style="margin-bottom: 24px;">
+            <span>Level: <strong th:text="${levelName}">5×5</strong></span>
+            <span>Move: <strong th:text="${step} + ' / ' + ${totalSteps}">0/0</strong></span>
+            <span>⏱ Total time: <strong th:text="${score.duration >= 60} ? (${score.duration / 60} + 'm ' + ${score.duration % 60} + 's') : (${score.duration} + 's')">0s</strong></span>
+        </div>
+
+        <!---->
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; align-items: center;">
+            <a th:href="@{/slitherlink/replay(ident=${ident}, step=0)}"
+               class="btn btn-blue">⏮ Rewind</a>
+
+            <a th:if="${step > 0}"
+               th:href="@{/slitherlink/replay(ident=${ident}, step=${step - 1})}"
+               class="btn btn-yellow">← Previous step</a>
+            <span th:unless="${step > 0}" class="btn btn-yellow"
+                  style="opacity: 0.3; cursor: default;">← Previous step</span>
+
+            <a th:if="${step < totalSteps}"
+               th:href="@{/slitherlink/replay(ident=${ident}, step=${step + 1})}"
+               class="btn btn-yellow">Next step →</a>
+            <span th:unless="${step < totalSteps}" class="btn btn-yellow"
+                  style="opacity: 0.3; cursor: default;">Next step →</span>
+
+            <a th:href="@{/slitherlink/replay(ident=${ident}, step=${totalSteps})}"
+               class="btn btn-blue">⏭ Fast forward</a>
+        </div>
+
+        <!---->
+        <div style="width: 100%; max-width: 400px; background: var(--bg-card2); border-radius: 4px; height: 6px; margin-bottom: 24px;">
+            <div th:style="'width: ' + ${totalSteps > 0 ? (step * 100 / totalSteps) : 0} + '%; background: var(--neon-blue); height: 6px; border-radius: 4px; transition: width 0.3s;'"></div>
+        </div>
+
+        <!---->
+        <div th:utext="${replayField}"></div>
+        <div style="margin-top: 24px;">
+            <a th:href="${backUrl}" class="btn btn-pink">← Back</a>
+        </div>
+
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Rules')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">RULES</div>
+
+        <div class="card" style="max-width: 700px;">
+            <div class="section-title blue mb-8">What is a Slitherlink?</div>
+            <p class="text-dim" style="margin-bottom: 20px; font-family: 'Rajdhani', sans-serif; font-size: 1rem; line-height: 1.7;">
+                Slitherlink is a logic game in which the player's (your) task is to draw a single closed loop.
+                <br>
+                CAN YOU BEAT TOP 10 !?
+
+            <!--HAD ANIMA-->
+            <div style="text-align: center; margin-bottom: 32px;">
+                <svg class="rules-snake" width="200" height="120" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                    <!--telo-->
+                    <polyline points="20,100 20,60 60,60 60,20 100,20 100,60 140,60 140,20 180,20 180,60"
+                              fill="none" stroke="#00ff88" stroke-width="6"
+                              stroke-linecap="round" stroke-linejoin="round">
+                        <animate attributeName="stroke-dasharray"
+                                 values="0,500;500,0"
+                                 dur="3s" repeatCount="indefinite"/>
+                    </polyline>
+                    <!--head-->
+                    <circle cx="180" cy="60" r="8" fill="#00ff88">
+                        <animate attributeName="r" values="8;10;8" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <!--oko-->
+                    <circle cx="183" cy="57" r="2.5" fill="#0a0a0f"/>
+                    <!--jazycek-->
+                    <line x1="188" y1="60" x2="194" y2="57" stroke="#ff00aa" stroke-width="2">
+                        <animate attributeName="x2" values="194;196;194" dur="0.5s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="188" y1="60" x2="194" y2="63" stroke="#ff00aa" stroke-width="2">
+                        <animate attributeName="x2" values="194;196;194" dur="0.5s" repeatCount="indefinite"/>
+                    </line>
+                </svg>
+            </div>
+
+            <hr class="divider"/>
+
+            <div class="section-title pink mb-8" style="margin-top: 20px;">Rules</div>
+            <div style="font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; line-height: 1.9; color: var(--text-main);">
+                <p>× Tiles with a number MUST have exactly as many active edges as the number they contain.</p>
+                <p>× A tile without a number can have any number of active edges.</p>
+                <p>× Try to create <span style="color: var(--neon-blue);">one single closed loop</span></p>
+            </div>
+
+            <hr class="divider"/>
+
+            <div class="section-title yellow mb-8" style="margin-top: 20px;">Controls</div>
+            <div style="font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; line-height: 1.9; color: var(--text-main);">
+                <p>× <span style="color: var(--neon-blue);">Click on the edge</span> between two points to activate it <span style="color: var(--neon-green);">(green)</span>.</p>
+                <p>× Clicking the edge a second time marks it as empty <span style="color: var(--neon-pink);">(red)</span>.</p>
+                <p>× Clicking the edge a third time deactivates it completely (no color).</p>
+                <br>
+                <p>× The game is automatically evaluated after each move.</p>
+                <p>× <span style="color: var(--neon-pink);">WARNING, the TIMER starts with you first move</span></p>
+            </div>
+
+            <hr class="divider"/>
+
+            <div class="section-title blue mb-8" style="margin-top: 20px;">TOP 10</div>
+            <div style="font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; line-height: 1.9; color: var(--text-main);">
+                <p>× Scoring - the fewer moves and shorter time, the better the score.</p>
+                <p>× The top 10 players are displayed separately for each level.</p>
+                <p>× After finishing the game, you can always decide whether you want to record your game in the leaderboard (if you made it there).</p>
+
+                <hr class="divider"/>
+                <p>Tips that might be useful to you:</p>
+                <p><span style="color: var(--neon-pink);">corner points can have 0 or 2 active edges coming out of them,</span></p>
+                <p><span style="color: var(--neon-pink);">no tile will ever have all 4 of its edges active</span></p>
+                <p><span style="color: var(--neon-pink);">check out video tutorial <a href="https://www.youtube.com/watch?v=TfCBVw7wvZQ" target="_blank" style="color: var(--neon-pink); text-decoration: underline;">HERE</a></span></p>
+                <p><span style="color: var(--neon-pink);">this is MORE than just a game, play with your friends!</span></p>
+            </div>
+        </div>
+
+    </main>
+</div>
+</body>
+</html>

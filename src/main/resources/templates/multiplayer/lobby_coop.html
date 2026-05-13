@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Slitherlink - Co-op Lobby')"></head>
+<body>
+<div class="layout">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <main class="main-content">
+        <div class="page-title">CO-OP LOBBY</div>
+
+        <div th:if="${error == 'expired'}" class="card" style="max-width: 600px;">
+            <div class="section-title pink mb-8">⚠ Lobby expired</div>
+            <p class="text-dim" style="font-size: 0.75rem;">
+                This lobby is no longer active. The creator may have cancelled it.
+            </p>
+            <a href="/slitherlink/inbox" class="btn btn-pink" style="margin-top: 12px;">← Back to Mailbox</a>
+        </div>
+        <div th:if="${error == 'notmember'}" class="card" style="max-width: 600px;">
+            <div class="section-title pink mb-8">⚠ Access denied</div>
+            <p class="text-dim" style="font-size: 0.75rem;">
+                You are not a member of this lobby.
+            </p>
+            <a href="/slitherlink/level" class="btn btn-pink" style="margin-top: 12px;">← Back</a>
+        </div>
+
+        <div th:if="${error == null}">
+            <div class="card" style="max-width: 600px; margin-bottom: 20px;">
+                <div class="section-title blue mb-8">Co-op — <span th:text="${levelName}">5×5</span></div>
+
+                <div class="text-dim" style="font-size: 0.7rem; margin-bottom: 12px;">
+                    Created by:
+                    <strong th:text="${lobby.creator}" style="color: var(--neon-blue);">creator</strong>
+                    · 2-4 players · 24h limit
+                </div>
+
+                <div th:if="${param.msg != null and param.msg[0] == 'sent'}"
+                     style="color: var(--neon-green); font-size: 0.65rem; margin-bottom: 8px;">
+                    ✔ Invite sent!
+                </div>
+                <div th:if="${param.msg != null and param.msg[0] == 'notfound'}"
+                     style="color: var(--accent-pink); font-size: 0.65rem; margin-bottom: 8px;">
+                    ⚠ Player not found.
+                </div>
+                <div th:if="${param.msg != null and param.msg[0] == 'self'}"
+                     style="color: var(--accent-pink); font-size: 0.65rem; margin-bottom: 8px;">
+                    ⚠ You can't invite yourself.
+                </div>
+                <div th:if="${param.msg != null and param.msg[0] == 'full'}"
+                     style="color: var(--accent-pink); font-size: 0.65rem; margin-bottom: 8px;">
+                    ⚠ Lobby is full (max 4 players for co-op).
+                </div>
+                <div th:if="${param.msg != null and param.msg[0] == 'empty'}"
+                     style="color: var(--accent-pink); font-size: 0.65rem; margin-bottom: 8px;">
+                    ⚠ Please enter a player name.
+                </div>
+            </div>
+
+            <!--invite-->
+            <div th:if="${isCreator}" class="card" style="max-width: 600px; margin-bottom: 20px;">
+                <div class="section-title yellow mb-8">Invite teammates</div>
+
+                <form th:action="@{'/slitherlink/lobby/' + ${lobby.token} + '/invite'}" method="post"
+                      style="display: flex; gap: 8px;">
+                    <div style="position: relative; flex: 1;">
+                        <input type="text" name="username" id="lobbyInviteInput" class="form-input"
+                               placeholder="Player name..." maxlength="10" autocomplete="off"
+                               onfocus="document.getElementById('lobby-follows-dropdown').style.display='block'"
+                               oninput="filterLobbyFollows()"
+                               style="width: 100%; font-size: 0.7rem;"/>
+                        <div id="lobby-follows-dropdown" style="display: none; position: absolute; top: 100%; left: 0;
+                             right: 0; background: var(--bg-card2); border: 1px solid var(--neon-blue);
+                             border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 10;">
+                            <div th:each="name : ${followingList}"
+                                 class="lobby-follow-option"
+                                 th:attr="data-name=${name}"
+                                 onclick="selectLobbyFollow(this.getAttribute('data-name'))"
+                                 style="padding: 6px 10px; cursor: pointer; font-size: 0.7rem;
+                                        display: flex; align-items: center; gap: 6px;
+                                        border-bottom: 1px solid var(--divider-color);">
+                                <span class="online-dot" th:attr="data-online-user=${name}"
+                                      style="width: 8px; height: 8px; border-radius: 50%; background: #555;"></span>
+                                <span th:text="${name}">player</span>
+                            </div>
+                            <div th:if="${#lists.isEmpty(followingList)}"
+                                 class="text-dim" style="padding: 6px 10px; font-size: 0.7rem;">
+                                No follows yet — type a username manually.
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-blue" style="font-size: 0.65rem;">Invite →</button>
+                </form>
+            </div>
+
+            <div id="creator-offline-warning" class="card"
+                 style="display: none; max-width: 600px; margin-bottom: 20px;
+            border-left: 3px solid var(--accent-pink);">
+                <p style="color: var(--accent-pink); font-size: 0.75rem; margin: 0;">
+                    ⚠ <strong id="creator-offline-name">Creator</strong> is offline.
+                    The game cannot start until they return — but the lobby stays open!
+                </p>
+            </div>
+
+            <!--membs-->
+            <div class="card" style="max-width: 600px; margin-bottom: 20px;">
+                <div class="section-title pink mb-8">👥 Team</div>
+
+                <div id="members-list">
+                    <div th:each="m : ${members}" class="member-row"
+                         th:attr="data-username=${m.username}"
+                         style="display: flex; justify-content: space-between; align-items: center;
+                                padding: 10px 0; border-bottom: 1px solid var(--divider-color);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="online-dot" th:attr="data-online-user=${m.username}"
+                                  style="display: inline-block; width: 8px; height: 8px;
+                                         border-radius: 50%; background: #555;"></span>
+                            <span th:text="${m.username}" style="font-size: 0.8rem;">name</span>
+                            <span th:if="${m.username == lobby.creator}" class="text-dim"
+                                  style="font-size: 0.55rem;">(creator)</span>
+                        </div>
+                        <span class="status-badge"
+                              th:text="${m.status}"
+                              th:style="${m.status == 'ACCEPTED'} ? 'color: var(--neon-green);' :
+                                        (${m.status == 'DECLINED'} ? 'color: var(--accent-pink);' :
+                                        'color: var(--accent-yellow);')"
+                              style="font-size: 0.65rem; font-family: 'Orbitron', monospace;">STATUS</span>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${gameRunning}" class="card"
+                 style="max-width: 600px; margin-bottom: 20px; border-left: 3px solid var(--neon-green);">
+                <div class="section-title" style="color: var(--neon-green); font-size: 0.85rem;">
+                    Game in progress
+                </div>
+                <p class="text-dim" style="font-size: 0.7rem; margin: 8px 0 12px 0;">
+                    A co-op session is currently running. You can join (or rejoin) it.
+                </p>
+                <a th:href="@{'/slitherlink/lobby/' + ${lobby.token} + '/join'}"
+                   class="btn btn-blue" style="font-size: 0.65rem;">▶ Join Game</a>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a th:if="${isCreator}"
+                   th:href="@{'/slitherlink/lobby/' + ${lobby.token} + '/cancel'}"
+                   class="btn btn-pink" style="font-size: 0.65rem;">🗑 Cancel lobby</a>
+                <a th:unless="${isCreator}"
+                   th:href="@{'/slitherlink/lobby/' + ${lobby.token} + '/leave'}"
+                   class="btn btn-pink" style="font-size: 0.65rem;">← Leave lobby</a>
+
+                <button th:if="${isCreator}" id="startBtn" disabled
+                        onclick="startGame()"
+                        class="btn btn-blue" style="font-size: 0.65rem; opacity: 0.4; cursor: not-allowed;">
+                    Start Co-op
+                </button>
+            </div>
+
+            <p th:if="${isCreator}" class="text-dim" style="font-size: 0.6rem; margin-top: 16px;">
+                Start button activates when at least 2 players have ACCEPTED (max 4).
+            </p>
+
+        </div>
+    </main>
+</div>
+
+<script th:if="${error == null}">
+    const lobbyToken = '[[${lobby.token}]]';
+    const isCreator = [[${isCreator}]];
+    const myName = '[[${playerName}]]';
+
+    function selectLobbyFollow(name) {
+        document.getElementById('lobbyInviteInput').value = name;
+        document.getElementById('lobby-follows-dropdown').style.display = 'none';
+    }
+
+    function filterLobbyFollows() {
+        const val = document.getElementById('lobbyInviteInput').value.toLowerCase();
+        document.querySelectorAll('.lobby-follow-option').forEach(opt => {
+            const name = (opt.getAttribute('data-name') || '').toLowerCase();
+            opt.style.display = name.indexOf(val) !== -1 ? 'flex' : 'none';
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#lobbyInviteInput') && !e.target.closest('#lobby-follows-dropdown')) {
+            const dd = document.getElementById('lobby-follows-dropdown');
+            if (dd) dd.style.display = 'none';
+        }
+    });
+
+    function startGame() {
+        window.location.href = '/slitherlink/lobby/' + lobbyToken + '/start';
+    }
+
+    async function pollLobby() {
+        try {
+            const res = await fetch('/api/lobby/' + lobbyToken);
+            const data = await res.json();
+
+            if (data.status === 'expired') {
+                window.location.href = '/slitherlink/level';
+                return;
+            }
+
+            if (data.status === 'PLAYING'
+                && window.location.pathname.indexOf('/lobby/') !== -1 && !isCreator) {
+                window.location.href = '/slitherlink/coop/' + lobbyToken;
+                return;
+            }
+
+            const list = document.getElementById('members-list');
+            list.innerHTML = '';
+            let acceptedCount = 0;
+            let invitedCount = 0;
+            let creatorOnline = true;
+            let creatorName = data.creator;
+
+            for (const m of data.members) {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--divider-color);';
+
+                const left = document.createElement('div');
+                left.style.cssText = 'display:flex;align-items:center;gap:8px;';
+                const dot = document.createElement('span');
+                dot.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;'
+                    + (m.online ? 'background:#00ff88;box-shadow:0 0 6px #00ff88;' : 'background:#555;');
+                left.appendChild(dot);
+                const nameEl = document.createElement('span');
+                nameEl.style.fontSize = '0.8rem';
+                nameEl.textContent = m.username;
+                left.appendChild(nameEl);
+                if (m.username === data.creator) {
+                    creatorOnline = m.online;
+                    const tag = document.createElement('span');
+                    tag.className = 'text-dim';
+                    tag.style.fontSize = '0.55rem';
+                    tag.textContent = '(creator)';
+                    left.appendChild(tag);
+                    if (!m.online) {
+                        nameEl.style.color = 'var(--text-dim)';
+                    }
+                }
+                row.appendChild(left);
+
+                const status = document.createElement('span');
+                status.style.cssText = 'font-size:0.65rem;font-family:"Orbitron",monospace;';
+                status.textContent = m.status;
+                if (m.status === 'ACCEPTED') {
+                    status.style.color = 'var(--neon-green)';
+                    acceptedCount++;
+                } else if (m.status === 'DECLINED') {
+                    status.style.color = 'var(--accent-pink)';
+                } else {
+                    status.style.color = 'var(--accent-yellow)';
+                    invitedCount++;
+                }
+
+                if (isCreator && m.username !== data.creator) {
+                    const wrap = document.createElement('div');
+                    wrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
+                    const kick = document.createElement('a');
+                    kick.href = '/slitherlink/lobby/' + lobbyToken + '/kick?user=' + encodeURIComponent(m.username);
+                    kick.style.cssText = 'color:var(--accent-pink);font-size:0.8rem;text-decoration:none;opacity:0.4;cursor:pointer;';
+                    kick.textContent = '✕';
+                    kick.title = 'Remove from lobby';
+                    kick.onmouseenter = function() { this.style.opacity = '1'; };
+                    kick.onmouseleave = function() { this.style.opacity = '0.4'; };
+                    wrap.appendChild(status);
+                    wrap.appendChild(kick);
+                    row.appendChild(wrap);
+                } else {
+                    row.appendChild(status);
+                }
+                list.appendChild(row);            }
+
+            const warning = document.getElementById('creator-offline-warning');
+            if (warning && !isCreator) {
+                if (!creatorOnline) {
+                    warning.style.display = 'block';
+                    const nameEl = document.getElementById('creator-offline-name');
+                    if (nameEl) nameEl.textContent = creatorName;
+                } else {
+                    warning.style.display = 'none';
+                }
+            }
+
+            if (isCreator) {
+                const btn = document.getElementById('startBtn');
+                if (btn) {
+                    if (acceptedCount >= 2) {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                    } else {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.4';
+                        btn.style.cursor = 'not-allowed';
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    pollLobby();
+    setInterval(pollLobby, 3000);
+</script>
+</body>
+</html>
