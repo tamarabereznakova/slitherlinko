@@ -54,7 +54,7 @@ public class SlitherFriendsController {
     private AchievementChecker achievementChecker;
 
     private static String profileGame(String username) {
-        return "player/profile:" + username;
+        return "profile:" + username;
     }
 
     @GetMapping("/slitherlink/profile/{username}")

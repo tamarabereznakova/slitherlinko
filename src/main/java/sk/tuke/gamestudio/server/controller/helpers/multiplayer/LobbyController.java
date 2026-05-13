@@ -99,12 +99,12 @@ public class LobbyController {
 
     @GetMapping("/slitherlink/lobby/race/{token}")
     public String lobbyRacePage(@PathVariable String token, Model model) {
-        return loadLobbyPage(token, "RACE", model, "lobby_race");
+        return loadLobbyPage(token, "RACE", model, "multiplayer/lobby_race");
     }
 
     @GetMapping("/slitherlink/lobby/coop/{token}")
     public String lobbyCoopPage(@PathVariable String token, Model model) {
-        return loadLobbyPage(token, "COOP", model, "lobby_coop");
+        return loadLobbyPage(token, "COOP", model, "multiplayer/lobby_coop");
     }
 
     @PostMapping("/slitherlink/lobby/{token}/invite")
