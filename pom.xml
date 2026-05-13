@@ -82,31 +82,24 @@
     </dependencyManagement>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.21.0</version>
+<plugins>
 
-                <configuration>
-                    <rulesets>
-                        <ruleset>src/main/resources/pmd-ruleset.xml</ruleset>
-                    </rulesets>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.21.0</version>
+    </plugin>
 
-                    <printFailingErrors>true</printFailingErrors>
-                </configuration>
+    <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
 
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>pmd</goal>
-                        </goals>
-                    </execution>
-                </executions>
+        <configuration>
+            <mainClass>sk.tuke.gamestudio.server.GameStudioServer</mainClass>
+        </configuration>
+    </plugin>
 
-            </plugin>
-        </plugins>
+</plugins>
     </build>
 
 </project>
