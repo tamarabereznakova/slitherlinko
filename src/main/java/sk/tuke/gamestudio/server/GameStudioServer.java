@@ -13,6 +13,7 @@ import sk.tuke.gamestudio.service.entity.history.ReplayService;
 import sk.tuke.gamestudio.service.entity.history.SavedGameService;
 import sk.tuke.gamestudio.service.entity.playerADDons.*;
 import sk.tuke.gamestudio.service.jpa.*;
+import org.springframework.boot.CommandLineRunner;
 
 @SpringBootApplication
 @Configuration
