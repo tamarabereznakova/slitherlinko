@@ -86,4 +86,52 @@ public class GameStudioServer {
     public MultiplayerScoreService multiplayerScoreService() {
         return new MultiplayerScoreServiceJPA();
     }
+
+    @Bean
+CommandLineRunner seedData(
+        PlayerService playerService,
+        ScoreService scoreService,
+        CommentService commentService,
+        RatingService ratingService
+) {
+    return args -> {
+
+        // 1. ADMIN USER
+        if (!playerService.exists("admin")) {
+            playerService.register("admin", "admin");
+        }
+
+        // 2. DEMO PLAYER
+        if (!playerService.exists("macicka")) {
+            playerService.register("macicka", "admin");
+
+            // SCORE
+            scoreService.addScore(new Score(
+                    "slitherlink",
+                    "macicka",
+                    58,
+                    new java.util.Date(),
+                    47,
+                    1,
+                    1
+            ));
+
+            // COMMENT
+            commentService.addComment(new Comment(
+                    "slitherlink",
+                    "macicka",
+                    "super hraaaaaaaa 🤍🤍",
+                    new java.util.Date()
+            ));
+
+            // RATING
+            ratingService.addRating(new Rating(
+                    "slitherlink",
+                    "macicka",
+                    5,
+                    new java.util.Date()
+            ));
+        }
+    };
+}
 }
