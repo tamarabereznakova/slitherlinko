@@ -5,6 +5,8 @@ This project was created as part of my personal portfolio during my second year 
 Slitherlink is a fully interactive, multiplayer online web application game inspired by the classic Slitherlink logic puzzle.
 The project was developed from scratch and includes the complete development process, from initial analysis and UML design to implementation and deployment.
 
+NOTE: If the app is not active for some time, it falls automatically into "sleep". By loading it, you will be sending request to wake up and fully load.
+
 # Features
 
 - UML diagrams and project documentation
